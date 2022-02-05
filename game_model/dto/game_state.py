@@ -17,6 +17,8 @@ class GameBoard:
 
 @dataclasses.dataclass(frozen=True)
 class GameState:
+    """The true game state."""
+
     boards: list[GameBoard]
 
 

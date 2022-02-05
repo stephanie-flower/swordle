@@ -14,6 +14,8 @@ class CharState(Enum):
 
 @dataclasses.dataclass(frozen=True)
 class UpdateViewStateDTO:
+    """An update to the view's state (Server -> Player)"""
+
     player: int
     row: int
     results: list[CharState]

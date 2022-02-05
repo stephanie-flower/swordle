@@ -6,6 +6,8 @@ from game_model.custom_types import JsonStr
 
 @dataclasses.dataclass(frozen=True)
 class UpdateTrueStateDTO:
+    """An update to the game state (Player -> Server)"""
+
     player_no: int
     row: int
     col: int
