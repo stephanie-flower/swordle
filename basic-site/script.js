@@ -1,7 +1,7 @@
 var currentGridPosition = '00';
 var lettersArray = [[],[],[],[],[],[]];
 
-var word = "hacks";
+var word = "HACKER";
 
 var won = false;
 
@@ -16,9 +16,10 @@ function colourKey(key, colour) {
 function checkWord() {
 	var rightLetters = 0;
 	wordArray = word.split("");
-	guess = lettersArray[parseInt(currentGridPosition[0])]
-	if (currentGridPosition == '54') {
-		document.getElementById('win').innerHTML = "you lose";
+	guess = lettersArray[parseInt(currentGridPosition[0])];
+	if (currentGridPosition == '55') {
+		//document.getElementById('win').innerHTML = "you lose";
+		won = false;
 	} else {
 		for (i=0; i<wordArray.length; i++) {
 			if (wordArray[i] == guess[i]) {
@@ -31,8 +32,8 @@ function checkWord() {
 				colourSquare(currentGridPosition[0] + i, '#363636');
 				colourKey(guess[i],'#363636');
 			}
-		}
-		if (rightLetters == 5) {
+		} 
+		if (rightLetters == 6) {
 			won = true;
 			document.getElementById('win').innerHTML = "you won";
 		}
@@ -40,11 +41,11 @@ function checkWord() {
 }
 
 function nextItem(current) {
-	items = current.split("");
+	items = current.split(""); //'01' -> ['0','1']
 	for (i=0; i<items.length; i++){
-		items[i] = parseInt(items[i]);
+		items[i] = parseInt(items[i]); //['0','1'] -> [0,1]
 	}
-	if (items[1] == 4){
+	if (items[1] == 5){
 		checkWord(lettersArray[items[0]]);
 		items[0] += 1;
 		items[1] = 0;

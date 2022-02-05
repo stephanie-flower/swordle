@@ -1,21 +1,69 @@
+body {
+    background-color: #3A3A3A;
+}
+
+.title {
+    display: flex;
+    justify-content: center;
+}
+
+.titleLetter {
+    background-color: #f09f26;
+    color: black;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 65px;
+    height: 65px;
+    width: 65px;
+    font-family: 'Inter', sans-serif;
+    font-size: 3rem;
+    margin: 10px;
+}
+
 .playfieldvs {
     display: flex;
     flex-direction: row;
+    margin-bottom: 30px;
 }
 
 .playfield {
-    border: 1px solid black;
-    width: 500px;
-    margin-right: 30px;
+    margin-left: 100px;
 }
 
-.letter {
+.playfield:nth-child(2n) {
+    margin-left: auto;
+    margin-right: 100px;
+}
+
+.activeletter {
+    display: flex;
+    box-shadow: 0px 5px rgba(0,0,0,0.5);
     font-size: 3rem;
+    font-family: 'Inter', sans-serif;
     display: block;
-    background-color: gray;
-    width: 100px;
-    height: 50px;
-    border: 1px solid black;
+    background-color: #D3D3D3;
+    width: 65px;
+    height: 65px;
+    border-radius: 5px;
+    margin: 5px;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 65px;
+}
+
+.inactiveletter {
+    display: flex;
+    font-size: 3rem;
+    font-family: 'Inter', sans-serif;
+    display: block;
+    background-color: #8c8c8c;
+    width: 65px;
+    height: 65px;
+    border-radius: 5px;
+    margin: 5px;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 65px;
 }
 
 .row {
@@ -23,19 +71,35 @@
 }
 
 .keyboard {
-    display: flex;
     flex-wrap: wrap;
-    border: 1px solid black;
-    width: 250px;
+    width: 700px;
+    margin-left: 30px;
 }
 
 .key {
+    font-family: 'Inter', sans-serif;
     font-size: 2rem;
-    background-color: gray;
-    width: fit-content;
+    background-color: #D3D3D3;
+    width: 45px;
+    height: 45px;
     min-width: 20px;
-    align-content: center;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 45px;
     padding: 5px;
     margin: 2px;
-    border-radius: 3px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.keyrow {
+    display: flex;
+}
+
+.keyrow:nth-child(2n) {
+    margin-left: 40px;
+}
+
+.keyrow:nth-child(3n) {
+    margin-left: 80px;
 }
