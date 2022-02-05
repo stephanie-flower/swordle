@@ -5,6 +5,18 @@ var word = "HACKER";
 
 var won = false;
 
+//var sendGameData = {
+//	'guess' = "",
+//	'roomCode' = 0000
+//};
+
+//var recieveGameData = {
+//	'playerColours' = [[],[],[],[],[],[]],
+//	'opponentColours' = [[],[],[],[],[],[]],
+//	'won' = false,
+//	roomCode = 0000
+//};
+
 function colourSquare(position, colour) {
 	document.getElementById(position).style.backgroundColor = colour;
 }
@@ -40,12 +52,35 @@ function checkWord() {
 	}
 }
 
+function back() {
+	console.log('back');
+	items = currentGridPosition.split(""); //'01' -> ['0','1']
+	for (i=0; i<items.length; i++){
+		items[i] = parseInt(items[i]); //['0','1'] -> [0,1]
+	}
+	if (items[1] != 0) {
+		lettersArray[items[0]].pop();
+		items[1] = items[1] - 1;
+		currentGridPosition = items.join().replace(',', '');
+		document.getElementById(currentGridPosition).innerHTML = '';
+	}
+}
+
+function activeRow(current) {
+	for(i=0; i<6; i++) {
+		item = document.getElementById(current + i.toString())
+		item.style.boxShadow = "0px 5px rgba(0,0,0,0.5)";
+		item.style.backgroundColor = "#D3D3D3";
+	}
+}
+
 function nextItem(current) {
 	items = current.split(""); //'01' -> ['0','1']
 	for (i=0; i<items.length; i++){
 		items[i] = parseInt(items[i]); //['0','1'] -> [0,1]
 	}
 	if (items[1] == 5){
+		activeRow(items[0] + 1);
 		checkWord(lettersArray[items[0]]);
 		items[0] += 1;
 		items[1] = 0;
@@ -57,6 +92,7 @@ function nextItem(current) {
 }
 
 function selectLetter(letter) {
+	console.log(lettersArray);
 	currentGrid = document.getElementById(currentGridPosition);
 	currentGrid.innerHTML = letter;
 	lettersArray[parseInt(currentGridPosition[0])].push(letter);
