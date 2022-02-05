@@ -10,7 +10,7 @@
     <input id="chat-input" type="text" size="100">
     <input id="chat-submit" type="button" value="Send">
     <input id="room-id" type="hidden" value={{ room_id }}>
-    <script
+    <script type="text/javascript">
         const roomId = JSON.parse(document.getElementById('room-id').textContent);
 
         const roomSocket = new WebSocket(
@@ -27,13 +27,13 @@
         };
 
         roomSocket.onclose = function(e) {
-            document.querySelector('#chat-log').value += "*** CONNECTION CLOSED ***";
+            document.querySelector('#chat-log').value += "*** CONNECTION CLOSED ***\n";
 
             console.error('Game socket closed unexpectedly');
         };
 
         roomSocket.onopen = function(e) {
-            document.querySelector('#chat-log').value += "*** Connected to Room " + roomId + " ***";
+            document.querySelector('#chat-log').value += "*** Connected to Room " + roomId + " ***\n";
 
             console.error('Game socket closed unexpectedly');
         };
