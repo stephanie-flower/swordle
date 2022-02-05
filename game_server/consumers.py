@@ -5,7 +5,14 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from django.shortcuts import redirect
 from django.core.cache import cache
 
+from .message_type import MessageType
+
 class GameSessionConsumer(AsyncWebsocketConsumer):
+    message_handlers = {}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(self, *args, **kwargs)
+        self.message_handlers[MessageType.KEY_INPUT] = self.key_input_handler
 
     async def connect(self):
         self.room_id = self.scope['url_route']['kwargs']['room_id']
@@ -30,12 +37,13 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
         )
 
         cache.set('current_rooms', current_rooms, None)
-
+        
         print("!! STATE UPDATE !! - Player Connected!")
 
         await self.accept()
 
     async def disconnect(self, close_code):
+        self.room_count[self.room_id] -= 1;
         # Leave session group
         await self.channel_layer.group_discard(
             self.room_id,
@@ -63,10 +71,14 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
 
     # Receive message from WebSocket
     async def receive(self, text_data):
-        text_data_json = json.loads(text_data)
-        message = text_data_json['message']
+        json_data = json.loads(text_data)
+        print(json_data)
+        await self.message_handlers[MessageType.KEY_INPUT](json_data)
 
+    async def key_input_handler(self, json_data):
+        message = json_data['message']
         # Send message to session group
+        print(message)
         await self.channel_layer.group_send(
             self.room_id,
             {
