@@ -1,10 +1,13 @@
 # game_server/consumers.py
 import json
+from threading import currentThread
 from channels.generic.websocket import AsyncWebsocketConsumer
+from django.shortcuts import redirect
+from django.core.cache import cache
+
 from .message_type import MessageType
 
 class GameSessionConsumer(AsyncWebsocketConsumer):
-    room_count = {}
     message_handlers = {}
 
     def __init__(self, *args, **kwargs):
@@ -14,18 +17,28 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.room_id = self.scope['url_route']['kwargs']['room_id']
 
-        if self.room_id in self.room_count:
-            if self.room_count[self.room_id] >= 2:
+        current_rooms = cache.get('current_rooms')
+
+        if current_rooms is None:
+            current_rooms = {}
+
+        if self.room_id in current_rooms:
+            if current_rooms[self.room_id] >= 2:
+                await self.disconnect()
                 return
-            self.room_count[self.room_id] += 1;
+            current_rooms[self.room_id] += 1
         else:
-            self.room_count[self.room_id] = 1;
+            current_rooms[self.room_id] = 1
 
         # Join session group with, giving the room_id and unique channel_name
         await self.channel_layer.group_add(
             self.room_id,
             self.channel_name
         )
+
+        cache.set('current_rooms', current_rooms, None)
+        
+        print("!! STATE UPDATE !! - Player Connected!")
 
         await self.accept()
 
@@ -36,6 +49,25 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
             self.room_id,
             self.channel_name
         )
+
+        print("!! STATE UPDATE !! - Player Disconnected!")
+
+        current_rooms = cache.get('current_rooms')
+
+        print("Room ID: %s\nPlayer Count: %s" % (self.room_id, current_rooms[self.room_id]))
+
+        if (current_rooms[self.room_id] - 1) > 0:
+            current_rooms[self.room_id] -= 1
+        else:
+            del current_rooms[self.room_id]
+
+        if (self.room_id in current_rooms):
+            print("Room ID: %s\nNew Player Count: %s" % (self.room_id, current_rooms[self.room_id]))
+        else:
+            print("Room deleted!")
+
+        cache.set('current_rooms', current_rooms, None)
+
 
     # Receive message from WebSocket
     async def receive(self, text_data):

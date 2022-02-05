@@ -5,12 +5,12 @@
     <meta charset="utf-8"/>
     <title>Chat</title>
 </head>
-<body>
+<body onload="document.querySelector('#chat-log').value = '';">
     <textarea id="chat-log" cols="100" rows="20"></textarea><br>
     <input id="chat-input" type="text" size="100"><br>
     <input id="chat-submit" type="button" value="Send">
     {{ room_id|json_script:"room-id" }}
-    <script>
+    <script type="text/javascript">
         const roomId = JSON.parse(document.getElementById('room-id').textContent);
 
         const roomSocket = new WebSocket(
@@ -27,6 +27,14 @@
         };
 
         roomSocket.onclose = function(e) {
+            document.querySelector('#chat-log').value += "*** CONNECTION CLOSED ***";
+        
+            console.error('Game socket closed unexpectedly');
+        };
+
+        roomSocket.onopen = function(e) {
+            document.querySelector('#chat-log').value += "*** Connected to Room " + roomId + " ***";
+        
             console.error('Game socket closed unexpectedly');
         };
 

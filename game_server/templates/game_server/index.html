@@ -6,22 +6,9 @@
     <title>Game Rooms</title>
 </head>
 <body>
-    What chat game would you like to enter?<br>
-    <input id="room-id-input" type="text" size="100"><br>
-    <input id="join-room-submit" type="button" value="Enter">
-
-    <script>
-        document.querySelector('#room-id-input').focus();
-        document.querySelector('#room-id-input').onkeyup = function(e) {
-            if (e.keyCode === 13) {  // enter, return
-                document.querySelector('#join-room-submit').click();
-            }
-        };
-
-        document.querySelector('#join-room-submit').onclick = function(e) {
-            var roomId = document.querySelector('#room-id-input').value;
-            window.location.pathname = '/room/' + roomId + '/';
-        };
-    </script>
+  <p>Press the button below to join a room!</p>
+  <form action="/room/join_room" method="GET">
+    <input type="submit" value="Join Room" />
+  </form>
 </body>
 </html>
