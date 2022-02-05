@@ -1,23 +1,24 @@
+# game_server/consumers.py
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 
 class GameSessionConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.room_name = self.scope['url_route']['kwargs']['room_name']
-        self.room_group_name = 'game_%s' % self.room_name
+        self.session_name = self.scope['url_route']['kwargs']['game_name']
+        self.session_group_name = 'game_%s' % self.session_name
 
-        # Join room group
+        # Join session group
         await self.channel_layer.group_add(
-            self.room_group_name,
+            self.session_group_name,
             self.channel_name
         )
 
         await self.accept()
 
     async def disconnect(self, close_code):
-        # Leave room group
+        # Leave session group
         await self.channel_layer.group_discard(
-            self.room_group_name,
+            self.session_group_name,
             self.channel_name
         )
 
@@ -26,9 +27,9 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         message = text_data_json['message']
 
-        # Send message to room group
+        # Send message to session group
         await self.channel_layer.group_send(
-            self.room_group_name,
+            self.session_group_name,
             {
                 'type': 'chat_message',
                 'message': message
