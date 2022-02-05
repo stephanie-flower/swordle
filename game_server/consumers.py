@@ -8,6 +8,8 @@ from django.core.cache import cache
 from .message_type import MessageType
 
 class GameSessionConsumer(AsyncWebsocketConsumer):
+    # room_id -> array of GameBoard
+    room_boards = {}
     message_handlers = {}
 
     def __init__(self, *args, **kwargs):
@@ -17,10 +19,26 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.room_id = self.scope['url_route']['kwargs']['room_id']
 
-        current_rooms = cache.get('current_rooms')
+        # Make the dictionary completely empty
+        board = {}
+        for row in range(0, 6):
+            for col in range(0, 6):
+                board[Coordinate(row, col)] = ''
+        gBoard = GameBoard(board)
 
+        # room_id -> player ids
+        current_rooms = cache.get('current_rooms')
         if current_rooms is None:
             current_rooms = {}
+
+        if self.room_id in current_rooms:
+            if len(current_rooms[self.room_id]) >= 2:
+                return
+            current_rooms[self.room_id].append(self.channel_name)
+            self.room_boards[self.room_id].append(gBoard)
+        else:
+            current_rooms[self.room_id] = [self.channel_name]
+            self.room_boards[self.room_id] = [gBoard]
 
         if self.room_id in current_rooms:
             if current_rooms[self.room_id] >= 2:
@@ -37,7 +55,7 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
         )
 
         cache.set('current_rooms', current_rooms, None)
-        
+
         print("!! STATE UPDATE !! - Player Connected!")
 
         await self.accept()

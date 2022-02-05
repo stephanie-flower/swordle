@@ -13,12 +13,12 @@ def join_room(request):
 
     if current_rooms:
         for i in current_rooms.keys():
-            if current_rooms[i] < 2:
+            if len(current_rooms[i]) < 2:
                 return redirect("/room/{0}/".format(i))
         new_room_id = int(i) + 1
-    
+
     return redirect("/room/{0}/".format(new_room_id))
-    
+
 
 def session(request, room_id):
     return render(request, 'game_server/game.html', {
