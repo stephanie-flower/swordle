@@ -7,10 +7,15 @@
 </head>
 <body onload="document.querySelector('#chat-log').value = '';">
     <textarea id="chat-log" cols="100" rows="20"></textarea><br>
-    <input id="chat-input" type="text" size="100"><br>
+    <input id="chat-input" type="text" size="100">
     <input id="chat-submit" type="button" value="Send">
+<<<<<<< Updated upstream
     {{ room_id|json_script:"room-id" }}
     <script type="text/javascript">
+=======
+    <input id="room-id" type="hidden" value={{ room_id }}>
+    <script>
+>>>>>>> Stashed changes
         const roomId = JSON.parse(document.getElementById('room-id').textContent);
 
         const roomSocket = new WebSocket(

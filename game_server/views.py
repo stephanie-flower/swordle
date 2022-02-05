@@ -21,6 +21,6 @@ def join_room(request):
     
 
 def session(request, room_id):
-    return render(request, 'game_server/chat.html', {
+    return render(request, 'game_server/game.html', {
         'room_id': room_id
     })

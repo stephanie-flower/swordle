@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'styles/style.css' %}" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>swordle</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!--<input id="room-id" type="hidden" value={{ room_id }}>-->
+    <div class="win" id="win">
+    </div>
+    <div class="title">
+        <div class="titleLetter">S</div>
+        <div class="titleLetter">W</div>
+        <div class="titleLetter">O</div>
+        <div class="titleLetter">R</div>
+        <div class="titleLetter">D</div>
+        <div class="titleLetter">L</div>
+        <div class="titleLetter">E</div>
+    </div>
+    <div class="playfieldvs">
+        <div class="playfield" id="local">
+            <div class="row">
+                <div class="activeletter" id='00'></div>
+                <div class="activeletter" id='01'></div>
+                <div class="activeletter" id='02'></div>
+                <div class="activeletter" id='03'></div>
+                <div class="activeletter" id='04'></div>
+                <div class="activeletter" id='05'></div>
+            </div>
+            <div class="row">
+                <div class="inactiveletter" id='10'></div>
+                <div class="inactiveletter" id='11'></div>
+                <div class="inactiveletter" id='12'></div>
+                <div class="inactiveletter" id='13'></div>
+                <div class="inactiveletter" id='14'></div>
+                <div class="inactiveletter" id='15'></div>
+            </div>
+            <div class="row">
+                <div class="inactiveletter" id='20'></div>
+                <div class="inactiveletter" id='21'></div>
+                <div class="inactiveletter" id='22'></div>
+                <div class="inactiveletter" id='23'></div>
+                <div class="inactiveletter" id='24'></div>
+                <div class="inactiveletter" id='25'></div>
+            </div>
+            <div class="row">
+                <div class="inactiveletter" id='30'></div>
+                <div class="inactiveletter" id='31'></div>
+                <div class="inactiveletter" id='32'></div>
+                <div class="inactiveletter" id='33'></div>
+                <div class="inactiveletter" id='34'></div>
+                <div class="inactiveletter" id='35'></div>
+            </div>
+            <div class="row">
+                <div class="inactiveletter" id='40'></div>
+                <div class="inactiveletter" id='41'></div>
+                <div class="inactiveletter" id='42'></div>
+                <div class="inactiveletter" id='43'></div>
+                <div class="inactiveletter" id='44'></div>
+                <div class="inactiveletter" id='45'></div>
+            </div>
+            <div class="row">
+                <div class="inactiveletter" id='50'></div>
+                <div class="inactiveletter" id='51'></div>
+                <div class="inactiveletter" id='52'></div>
+                <div class="inactiveletter" id='53'></div>
+                <div class="inactiveletter" id='54'></div>
+                <div class="inactiveletter" id='55'></div>
+            </div>
+        </div>
+
+        <div class="playfield" id="opponent">
+            <div class="row">
+                <div class="inactiveletter" id='o00'></div>
+                <div class="inactiveletter" id='o01'></div>
+                <div class="inactiveletter" id='o02'></div>
+                <div class="inactiveletter" id='o03'></div>
+                <div class="inactiveletter" id='o04'></div>
+                <div class="inactiveletter" id='o05'></div>
+            </div>
+            <div class="row">
+                <div class="inactiveletter" id='o10'></div>
+                <div class="inactiveletter" id='o11'></div>
+                <div class="inactiveletter" id='o12'></div>
+                <div class="inactiveletter" id='o13'></div>
+                <div class="inactiveletter" id='o14'></div>
+                <div class="inactiveletter" id='o15'></div>
+            </div>
+            <div class="row">
+                <div class="inactiveletter" id='o20'></div>
+                <div class="inactiveletter" id='o21'></div>
+                <div class="inactiveletter" id='o22'></div>
+                <div class="inactiveletter" id='o23'></div>
+                <div class="inactiveletter" id='o24'></div>
+                <div class="inactiveletter" id='o25'></div>
+            </div>
+            <div class="row">
+                <div class="inactiveletter" id='o30'></div>
+                <div class="inactiveletter" id='o31'></div>
+                <div class="inactiveletter" id='o32'></div>
+                <div class="inactiveletter" id='o33'></div>
+                <div class="inactiveletter" id='o34'></div>
+                <div class="inactiveletter" id='o35'></div>
+            </div>
+            <div class="row">
+                <div class="inactiveletter" id='o40'></div>
+                <div class="inactiveletter" id='o41'></div>
+                <div class="inactiveletter" id='o42'></div>
+                <div class="inactiveletter" id='o43'></div>
+                <div class="inactiveletter" id='o44'></div>
+                <div class="inactiveletter" id='o45'></div>
+            </div>
+            <div class="row">
+                <div class="inactiveletter" id='o50'></div>
+                <div class="inactiveletter" id='o51'></div>
+                <div class="inactiveletter" id='o52'></div>
+                <div class="inactiveletter" id='o53'></div>
+                <div class="inactiveletter" id='o54'></div>
+                <div class="inactiveletter" id='o55'></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="keyboard">
+        <div class="keyrow">
+            <div class="key" id='Q' onclick="selectLetter('Q')">Q</div>
+            <div class="key" id='W' onclick="selectLetter('W')">W</div>
+            <div class="key" id='E' onclick="selectLetter('E')">E</div>
+            <div class="key" id='R' onclick="selectLetter('R')">R</div>
+            <div class="key" id='T' onclick="selectLetter('T')">T</div>
+            <div class="key" id='Y' onclick="selectLetter('Y')">Y</div>
+            <div class="key" id='U' onclick="selectLetter('U')">U</div>
+            <div class="key" id='I' onclick="selectLetter('I')">I</div>
+            <div class="key" id='O' onclick="selectLetter('O')">O</div>
+            <div class="key" id='P' onclick="selectLetter('P')">P</div>
+        </div>
+        <div class="keyrow">
+            <div class="key" id='A' onclick="selectLetter('A')">A</div>
+            <div class="key" id='S' onclick="selectLetter('S')">S</div>
+            <div class="key" id='D' onclick="selectLetter('D')">D</div>
+            <div class="key" id='F' onclick="selectLetter('F')">F</div>
+            <div class="key" id='G' onclick="selectLetter('G')">G</div>
+            <div class="key" id='H' onclick="selectLetter('H')">H</div>
+            <div class="key" id='J' onclick="selectLetter('J')">J</div>
+            <div class="key" id='K' onclick="selectLetter('K')">K</div>
+            <div class="key" id='L' onclick="selectLetter('L')">L</div>
+            <div class="key" id='back' onclick = "back()"> <- </div>
+        </div>
+        <div class="keyrow">
+            <div class="key" id='Z' onclick="selectLetter('Z')">Z</div>
+            <div class="key" id='X' onclick="selectLetter('X')">X</div>
+            <div class="key" id='C' onclick="selectLetter('C')">C</div>
+            <div class="key" id='V' onclick="selectLetter('V')">V</div>
+            <div class="key" id='B' onclick="selectLetter('B')">B</div>
+            <div class="key" id='N' onclick="selectLetter('N')">N</div>
+            <div class="key" id='M' onclick="selectLetter('M')">M</div>
+            <div class="key" id='enter' onclick="enter()">Enter</div>
+        </div>
+    </div>
+
+    <script src="{% static 'scripts/script.js' %}"></script>
+</body>
+</html>
