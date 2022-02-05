@@ -60,9 +60,8 @@ function back() {
 	}
 	if (items[1] != 0) {
 		lettersArray[items[0]].pop();
-		items[1] = items[1] - 1;
-		currentGridPosition = items.join().replace(',', '');
 		document.getElementById(currentGridPosition).innerHTML = '';
+		items[1] = items[1] - 1;
 	}
 }
 
