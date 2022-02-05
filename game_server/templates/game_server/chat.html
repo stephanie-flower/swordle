@@ -1,0 +1,50 @@
+<!-- game_server/templates/game_server/game.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Chat</title>
+</head>
+<body>
+    <textarea id="chat-log" cols="100" rows="20"></textarea><br>
+    <input id="chat-input" type="text" size="100"><br>
+    <input id="chat-submit" type="button" value="Send">
+    {{ room_id|json_script:"room-id" }}
+    <script>
+        const roomId = JSON.parse(document.getElementById('room-id').textContent);
+
+        const roomSocket = new WebSocket(
+            'ws://'
+            + window.location.host
+            + '/ws/session/'
+            + roomId
+            + '/'
+        );
+
+        roomSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            document.querySelector('#chat-log').value += (data.message + '\n');
+        };
+
+        roomSocket.onclose = function(e) {
+            console.error('Game socket closed unexpectedly');
+        };
+
+        document.querySelector('#chat-input').focus();
+        document.querySelector('#chat-input').onkeyup = function(e) {
+            if (e.keyCode === 13) {  // enter, return
+                document.querySelector('#chat-submit').click();
+            }
+        };
+
+        document.querySelector('#chat-submit').onclick = function(e) {
+            const messageInputDom = document.querySelector('#chat-input');
+            const message = messageInputDom.value;
+            roomSocket.send(JSON.stringify({
+                'message': message
+            }));
+            messageInputDom.value = '';
+        };
+    </script>
+</body>
+</html>

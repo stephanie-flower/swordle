@@ -4,7 +4,7 @@ from django.shortcuts import render
 def index(request):
     return render(request, 'game_server/index.html', {})
 
-def session(request, game_name):
-    return render(request, 'game_server/game.html', {
-        'game_name': game_name
+def session(request, room_id):
+    return render(request, 'game_server/chat.html', {
+        'room_id': room_id
     })

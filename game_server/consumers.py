@@ -3,22 +3,32 @@ import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 
 class GameSessionConsumer(AsyncWebsocketConsumer):
-    async def connect(self):
-        self.session_name = self.scope['url_route']['kwargs']['game_name']
-        self.session_group_name = 'game_%s' % self.session_name
+    room_count = {}
 
-        # Join session group
+    async def connect(self):
+        self.room_id = self.scope['url_route']['kwargs']['room_id']
+
+        if self.room_id in self.room_count:
+            if self.room_count[self.room_id] >= 2:
+                return
+            self.room_count[self.room_id] += 1;
+        else:
+            self.room_count[self.room_id] = 1;
+
+        # Join session group with, giving the room_id and unique channel_name
         await self.channel_layer.group_add(
-            self.session_group_name,
+            self.room_id,
             self.channel_name
         )
 
         await self.accept()
 
+        return redirect('room/' + self.room_id);
+
     async def disconnect(self, close_code):
         # Leave session group
         await self.channel_layer.group_discard(
-            self.session_group_name,
+            self.room_id,
             self.channel_name
         )
 
@@ -29,7 +39,7 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
 
         # Send message to session group
         await self.channel_layer.group_send(
-            self.session_group_name,
+            self.room_id,
             {
                 'type': 'chat_message',
                 'message': message
