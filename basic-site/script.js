@@ -79,22 +79,34 @@ function nextItem(current) {
 	for (i=0; i<items.length; i++){
 		items[i] = parseInt(items[i]); //['0','1'] -> [0,1]
 	}
-	if (items[1] == 5){
+	if (items[1] != 5){
+		items[1] += 1;
+		currentGridPosition = items.join().replace(',','');
+	}
+}
+
+function enter() {
+	items = currentGridPosition.split(""); //'01' -> ['0','1']
+	for (i=0; i<items.length; i++){
+		items[i] = parseInt(items[i]); //['0','1'] -> [0,1]
+	}3
+	if (items[1] == 5) {
+		console.log(currentGridPosition);
 		activeRow(items[0] + 1);
 		checkWord(lettersArray[items[0]]);
 		items[0] += 1;
 		items[1] = 0;
-	} else {
-		items[1] += 1;
+		currentGridPosition = items.join().replace(',', '')
 	}
-
-	return items.join().replace(',', '');
 }
 
 function selectLetter(letter) {
 	console.log(lettersArray);
+	console.log(currentGridPosition);
 	currentGrid = document.getElementById(currentGridPosition);
 	currentGrid.innerHTML = letter;
-	lettersArray[parseInt(currentGridPosition[0])].push(letter);
-	currentGridPosition = nextItem(currentGridPosition);
+	if (lettersArray[parseInt(currentGridPosition[0])].length < 6) {
+		lettersArray[parseInt(currentGridPosition[0])].push(letter);
+	}
+	nextItem(currentGridPosition);
 }

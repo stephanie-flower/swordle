@@ -92,6 +92,10 @@ body {
     cursor: pointer;
 }
 
+#enter {
+    width: 85px;
+}
+
 .keyrow {
     display: flex;
 }
