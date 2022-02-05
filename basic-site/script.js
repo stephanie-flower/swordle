@@ -62,6 +62,9 @@ function back() {
 		lettersArray[items[0]].pop();
 		document.getElementById(currentGridPosition).innerHTML = '';
 		items[1] = items[1] - 1;
+		currentGridPosition = items.join().replace(',','');
+	} else {
+		document.getElementById(currentGridPosition).innerHTML = '';
 	}
 }
 
@@ -88,7 +91,7 @@ function enter() {
 	items = currentGridPosition.split(""); //'01' -> ['0','1']
 	for (i=0; i<items.length; i++){
 		items[i] = parseInt(items[i]); //['0','1'] -> [0,1]
-	}3
+	}
 	if (items[1] == 5) {
 		console.log(currentGridPosition);
 		activeRow(items[0] + 1);
