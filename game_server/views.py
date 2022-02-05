@@ -5,9 +5,11 @@ from django.core.cache import cache
 def index(request):
     return render(request, 'game_server/index.html', {})
 
-def join_game(request):
+def join_room(request):
     current_rooms = cache.get('current_rooms')
     new_room_id = 0
+
+    print("Rooms that are available: %s" % current_rooms)
 
     if current_rooms:
         for i in current_rooms.keys():

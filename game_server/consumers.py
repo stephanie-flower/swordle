@@ -31,6 +31,8 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
 
         cache.set('current_rooms', current_rooms, None)
 
+        print("!! STATE UPDATE !! - Player Connected!")
+
         await self.accept()
 
     async def disconnect(self, close_code):
@@ -39,6 +41,25 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
             self.room_id,
             self.channel_name
         )
+
+        print("!! STATE UPDATE !! - Player Disconnected!")
+
+        current_rooms = cache.get('current_rooms')
+
+        print("Room ID: %s\nPlayer Count: %s" % (self.room_id, current_rooms[self.room_id]))
+
+        if (current_rooms[self.room_id] - 1) > 0:
+            current_rooms[self.room_id] -= 1
+        else:
+            del current_rooms[self.room_id]
+
+        if (self.room_id in current_rooms):
+            print("Room ID: %s\nNew Player Count: %s" % (self.room_id, current_rooms[self.room_id]))
+        else:
+            print("Room deleted!")
+
+        cache.set('current_rooms', current_rooms, None)
+
 
     # Receive message from WebSocket
     async def receive(self, text_data):
