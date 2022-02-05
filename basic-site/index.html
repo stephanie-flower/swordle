@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="style.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>swordle</title>
+</head>
+<body>
+    <div class="win" id="win">
+        
+    </div>
+    <div class="playfieldvs">
+        <div class="playfield">
+            <div class="row">
+                <div class="letter" id='00'></div>
+                <div class="letter" id='01'></div>
+                <div class="letter" id='02'></div>
+                <div class="letter" id='03'></div>
+                <div class="letter" id='04'></div>
+            </div>
+            <div class="row">
+                <div class="letter" id='10'></div>
+                <div class="letter" id='11'></div>
+                <div class="letter" id='12'></div>
+                <div class="letter" id='13'></div>
+                <div class="letter" id='14'></div>
+            </div>
+            <div class="row">
+                <div class="letter" id='20'></div>
+                <div class="letter" id='21'></div>
+                <div class="letter" id='22'></div>
+                <div class="letter" id='23'></div>
+                <div class="letter" id='24'></div>
+            </div>
+            <div class="row">
+                <div class="letter" id='30'></div>
+                <div class="letter" id='31'></div>
+                <div class="letter" id='32'></div>
+                <div class="letter" id='33'></div>
+                <div class="letter" id='34'></div>
+            </div>
+            <div class="row">
+                <div class="letter" id='40'></div>
+                <div class="letter" id='41'></div>
+                <div class="letter" id='42'></div>
+                <div class="letter" id='43'></div>
+                <div class="letter" id='44'></div>
+            </div>
+            <div class="row">
+                <div class="letter" id='50'></div>
+                <div class="letter" id='51'></div>
+                <div class="letter" id='52'></div>
+                <div class="letter" id='53'></div>
+                <div class="letter" id='54'></div>
+            </div>
+        </div>
+
+        <div class="playfield">
+            <div class="row">
+                <div class="letter" id='o00'></div>
+                <div class="letter" id='o01'></div>
+                <div class="letter" id='o02'></div>
+                <div class="letter" id='o03'></div>
+                <div class="letter" id='o04'></div>
+            </div>
+            <div class="row">
+                <div class="letter" id='o10'></div>
+                <div class="letter" id='o11'></div>
+                <div class="letter" id='o12'></div>
+                <div class="letter" id='o13'></div>
+                <div class="letter" id='o14'></div>
+            </div>
+            <div class="row">
+                <div class="letter" id='o20'></div>
+                <div class="letter" id='o21'></div>
+                <div class="letter" id='o22'></div>
+                <div class="letter" id='o23'></div>
+                <div class="letter" id='o24'></div>
+            </div>
+            <div class="row">
+                <div class="letter" id='o30'></div>
+                <div class="letter" id='o31'></div>
+                <div class="letter" id='o32'></div>
+                <div class="letter" id='o33'></div>
+                <div class="letter" id='o34'></div>
+            </div>
+            <div class="row">
+                <div class="letter" id='o40'></div>
+                <div class="letter" id='o41'></div>
+                <div class="letter" id='o42'></div>
+                <div class="letter" id='o43'></div>
+                <div class="letter" id='o44'></div>
+            </div>
+            <div class="row">
+                <div class="letter" id='50'></div>
+                <div class="letter" id='51'></div>
+                <div class="letter" id='52'></div>
+                <div class="letter" id='53'></div>
+                <div class="letter" id='54'></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="keyboard">
+        <div class="key" id='q' onclick="selectLetter('q')">q</div>
+        <div class="key" id='w' onclick="selectLetter('w')">w</div>
+        <div class="key" id='e' onclick="selectLetter('e')">e</div>
+        <div class="key" id='r' onclick="selectLetter('r')">r</div>
+        <div class="key" id='t' onclick="selectLetter('t')">t</div>
+        <div class="key" id='y' onclick="selectLetter('y')">y</div>
+        <div class="key" id='u' onclick="selectLetter('u')">u</div>
+        <div class="key" id='i' onclick="selectLetter('i')">i</div>
+        <div class="key" id='o' onclick="selectLetter('o')">o</div>
+        <div class="key" id='p' onclick="selectLetter('p')">p</div>
+        <div class="key" id='a' onclick="selectLetter('a')">a</div>
+        <div class="key" id='s' onclick="selectLetter('s')">s</div>
+        <div class="key" id='d' onclick="selectLetter('d')">d</div>
+        <div class="key" id='f' onclick="selectLetter('f')">f</div>
+        <div class="key" id='g' onclick="selectLetter('g')">g</div>
+        <div class="key" id='h' onclick="selectLetter('h')">h</div>
+        <div class="key" id='j' onclick="selectLetter('j')">j</div>
+        <div class="key" id='k' onclick="selectLetter('k')">k</div>
+        <div class="key" id='l' onclick="selectLetter('l')">l</div>
+        <div class="key" id='z' onclick="selectLetter('z')">z</div>
+        <div class="key" id='x' onclick="selectLetter('x')">x</div>
+        <div class="key" id='c' onclick="selectLetter('c')">c</div>
+        <div class="key" id='v' onclick="selectLetter('v')">v</div>
+        <div class="key" id='b' onclick="selectLetter('b')">b</div>
+        <div class="key" id='n' onclick="selectLetter('n')">n</div>
+        <div class="key" id='m' onclick="selectLetter('m')">m</div>
+    </div>
+
+    <script src='script.js'></script>
+</body>
+</html>
