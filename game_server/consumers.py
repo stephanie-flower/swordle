@@ -1,19 +1,27 @@
 # game_server/consumers.py
 import json
+from threading import currentThread
 from channels.generic.websocket import AsyncWebsocketConsumer
+from django.shortcuts import redirect
+from django.core.cache import cache
 
 class GameSessionConsumer(AsyncWebsocketConsumer):
-    room_count = {}
 
     async def connect(self):
         self.room_id = self.scope['url_route']['kwargs']['room_id']
 
-        if self.room_id in self.room_count:
-            if self.room_count[self.room_id] >= 2:
+        current_rooms = cache.get('current_rooms')
+
+        if current_rooms is None:
+            current_rooms = {}
+
+        if self.room_id in current_rooms:
+            if current_rooms[self.room_id] >= 2:
+                await self.disconnect()
                 return
-            self.room_count[self.room_id] += 1;
+            current_rooms[self.room_id] += 1
         else:
-            self.room_count[self.room_id] = 1;
+            current_rooms[self.room_id] = 1
 
         # Join session group with, giving the room_id and unique channel_name
         await self.channel_layer.group_add(
@@ -21,9 +29,9 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
 
-        await self.accept()
+        cache.set('current_rooms', current_rooms, None)
 
-        return redirect('room/' + self.room_id);
+        await self.accept()
 
     async def disconnect(self, close_code):
         # Leave session group
