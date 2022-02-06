@@ -9,11 +9,13 @@ from game_model.dto.game_state import GameBoard
 from game_model.json_interfaces.view_state import CharState
 
 from .message_type import MessageType
+from .game_state import GameState
 
 class GameSessionConsumer(AsyncWebsocketConsumer):
     # room_id -> dict of room to (dict of GameBoard to player)
     room_boards = {}
     message_handlers = {}
+    game_state = GameState.NOT_STARTED
 
     def __init__(self, *args, **kwargs):
         super().__init__(self, *args, **kwargs)
@@ -35,14 +37,28 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
         if current_rooms is None:
             current_rooms = {}
 
+        print(1)
+        print(current_rooms)
+        print(self.room_id)
+        print(self.channel_name)
+
         if self.room_id in current_rooms:
             if len(current_rooms[self.room_id]) >= 2:
                 return
             current_rooms[self.room_id].append(self.channel_name)
             self.room_boards[self.room_id][self.channel_name] = gBoard
+
+            self.game_state = GameState.IN_GAME
         else:
             current_rooms[self.room_id] = [self.channel_name]
             self.room_boards[self.room_id] = {self.channel_name: gBoard}
+
+            self.game_state = GameState.WAITING_FOR_PLAYERS
+
+        print(2)
+        print(current_rooms)
+        print(self.room_id)
+        print(self.channel_name)
 
         # Join session group with, giving the room_id and unique channel_name
         await self.channel_layer.group_add(
@@ -53,9 +69,7 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
         cache.set('current_rooms', current_rooms, None)
 
         print("!! STATE UPDATE !! - Player Connected!")
-        print(current_rooms)
-        print(self.room_id)
-        print(self.channel_name)
+        print("GameState: %s" % self.game_state)
 
         await self.accept()
 
@@ -65,6 +79,17 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
                 'id': self.channel_name
             }
         }))
+
+        await self.channel_layer.group_send(
+            self.room_id,
+            {
+                'type': "send_to_room",
+                'payload': {
+                    'type': MessageType.STATE_UPDATE,
+                    'state': self.game_state
+                }
+            }
+        )
 
     async def disconnect(self, close_code):
         pass
@@ -140,9 +165,9 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
 
         charStates = []
         for i in range(0, 6):
-            if word[i] == target_word[i]:
+            if (word[i] == target_word[i]):
                 charStates.append(CharState.CORRECT_PLACEMENT)
-            elif word[i] in target_word:
+            elif (target_word[i].__contains__(word[i])):
                 charStates.append(CharState.CORRECT_LETTER)
             else:
                 charStates.append(CharState.INCORRECT)
