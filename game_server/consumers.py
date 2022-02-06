@@ -217,6 +217,7 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
                     'type': "send_to_room",
                     'payload': {
                         'type': MessageType.STATE_UPDATE,
+                        'room': room_id,
                         'state': self.game_state[room_id]
                     }
                 }
@@ -228,6 +229,7 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
                     'type': "send_to_room",
                     'payload': {
                         'type': MessageType.STATE_UPDATE,
+                        'room': room_id,
                         'state': self.game_state[room_id],
                         'solution': self.room_target[room_id]
                     }
