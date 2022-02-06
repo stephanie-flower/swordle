@@ -87,7 +87,7 @@ function activeRow(current) {
 	}
 }
 
-function updateUI() {
+function updateUI(payload) {
 	var overlay = document.getElementById("playfield-overlay");
 	var overlay_header = document.getElementById("playfield-header");
 
@@ -111,6 +111,7 @@ function updateUI() {
 			overlay.style = "display: inline; color: red;";
 			//overlay_header.innerText = "Game Over";
 			overlay_header.innerHTML = "Game Over <a href='/room'> <- Back to home </a>"
+			alert(payload.solution);
 			break;
 
 	}
@@ -179,7 +180,7 @@ roomSocket.onmessage = function(e) {
 				break;
 			case "STATE_UPDATE":
 				gameState = data.payload.state;
-				updateUI();
+				updateUI(data.payload);
 				break;
 			case "PLAYER_WIN":
 				if (playerId == data.payload.player) {

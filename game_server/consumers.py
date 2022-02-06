@@ -49,11 +49,6 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
         if current_rooms is None:
             current_rooms = {}
 
-        print(1)
-        print(current_rooms)
-        print(self.room_id)
-        print(self.channel_name)
-
         if self.room_id in current_rooms:
             if len(current_rooms[self.room_id]) >= 2:
                 return
@@ -66,11 +61,6 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
             self.room_boards[self.room_id] = {self.channel_name: gBoard}
             self.room_target[self.room_id] = self.get_random_word().upper()
             self.game_state[self.room_id] = GameState.WAITING_FOR_PLAYERS
-
-        print(2)
-        print(current_rooms)
-        print(self.room_id)
-        print(self.channel_name)
 
         # Join session group with, giving the room_id and unique channel_name
         await self.channel_layer.group_add(
@@ -121,7 +111,6 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
         )
 
         print("!! STATE UPDATE !! - Player Disconnected!")
-
         print("Room ID: %s\nPlayer Count: %s" % (room_id, current_rooms[room_id]))
 
         if len(current_rooms[room_id]) - 1 <= 0:
@@ -180,7 +169,6 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
             rowHead = room.copy()
             rowHead.pop(player_id)
             otherBoard = rowHead[list(rowHead.keys())[0]]
-            print(otherBoard.board[Coordinate(5, 5)])
             if otherBoard.board[Coordinate(5, 5)] == '':
                 # TODO: if not finished, start a timer to make game over appear
                 pass
@@ -222,16 +210,29 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
 
     async def send_state_to_room(self, room_id):
         print(self.game_state[room_id])
-        await self.channel_layer.group_send(
-            self.room_id,
-            {
-                'type': "send_to_room",
-                'payload': {
-                    'type': MessageType.STATE_UPDATE,
-                    'state': self.game_state[room_id]
+        if self.game_state[room_id] != GameState.GAME_OVER:
+            await self.channel_layer.group_send(
+                self.room_id,
+                {
+                    'type': "send_to_room",
+                    'payload': {
+                        'type': MessageType.STATE_UPDATE,
+                        'state': self.game_state[room_id]
+                    }
                 }
-            }
-        )
+            )
+        else:
+            await self.channel_layer.group_send(
+                self.room_id,
+                {
+                    'type': "send_to_room",
+                    'payload': {
+                        'type': MessageType.STATE_UPDATE,
+                        'state': self.game_state[room_id],
+                        'solution': self.room_target[room_id]
+                    }
+                }
+            )
 
     # Receive message from room group
     async def send_to_room(self, event):
