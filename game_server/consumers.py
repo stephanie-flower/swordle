@@ -18,6 +18,7 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(self, *args, **kwargs)
         self.message_handlers[MessageType.SUBMIT_WORD] = self.word_submit_handler
+        self.message_handlers[MessageType.DISCONNECTED] = self.actual_disconnect
 
     async def connect(self):
         self.room_id = self.scope['url_route']['kwargs']['room_id']
@@ -34,6 +35,11 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
         if current_rooms is None:
             current_rooms = {}
 
+        print(1)
+        print(current_rooms)
+        print(self.room_id)
+        print(self.channel_name)
+
         if self.room_id in current_rooms:
             if len(current_rooms[self.room_id]) >= 2:
                 return
@@ -42,6 +48,11 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
         else:
             current_rooms[self.room_id] = [self.channel_name]
             self.room_boards[self.room_id] = {self.channel_name: gBoard}
+
+        print(2)
+        print(current_rooms)
+        print(self.room_id)
+        print(self.channel_name)
 
         # Join session group with, giving the room_id and unique channel_name
         await self.channel_layer.group_add(
@@ -63,28 +74,39 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
         }))
 
     async def disconnect(self, close_code):
+        pass
+
+    async def actual_disconnect(self, json_data):
+        payload = json_data['payload']
+        room_id = str(payload['room'])
+        player_id = payload['id']
+
         current_rooms = cache.get('current_rooms')
-        if self.channel_name in current_rooms[self.room_id]:
-            current_rooms[self.room_id].remove(self.channel_name);
+
+        print(3)
+        print(current_rooms)
+        print(room_id)
+        print(player_id)
+
+        if player_id in current_rooms[room_id]:
+            current_rooms[room_id].remove(player_id);
         # Leave session group
         await self.channel_layer.group_discard(
-            self.room_id,
-            self.channel_name
+            room_id,
+            player_id
         )
 
         print("!! STATE UPDATE !! - Player Disconnected!")
 
         current_rooms = cache.get('current_rooms')
 
-        print("Room ID: %s\nPlayer Count: %s" % (self.room_id, current_rooms[self.room_id]))
+        print("Room ID: %s\nPlayer Count: %s" % (room_id, current_rooms[room_id]))
 
-        if len(current_rooms[self.room_id]) - 1 > 0:
-            current_rooms[self.room_id] -= 1
-        else:
-            del current_rooms[self.room_id]
+        if len(current_rooms[room_id]) - 1 <= 0:
+            del current_rooms[room_id]
 
-        if (self.room_id in current_rooms):
-            print("Room ID: %s\nNew Player Count: %s" % (self.room_id, current_rooms[self.room_id]))
+        if (room_id in current_rooms):
+            print("Room ID: %s\nNew Player Count: %s" % (room_id, current_rooms[room_id]))
         else:
             print("Room deleted!")
 
@@ -95,60 +117,63 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         json_data = json.loads(text_data)
         print(json_data)
-        await self.message_handlers[MessageType.SUBMIT_WORD](json_data)
+        await self.message_handlers[json_data['type']](json_data)
 
     async def word_submit_handler(self, json_data):
         payload = json_data['payload']
-        print(payload)
-
+        room_id = str(payload['room'])
+        player_id = payload['id']
         row = int(payload['row'])
         word = payload['word'].upper()
+
         target_word = "HACKER" # TODO: add a bank of words
 
         # Change the correct board to have the charStates and update
-        room = self.room_boards[self.room_id]
-        changedBoard = room[self.channel_name]
+        room = self.room_boards[room_id]
+        changedBoard = room[player_id]
 
         if word == target_word:
             # Send message to session group
             await self.channel_layer.group_send(
-                self.room_id,
+                room_id,
                 {
                     'type': "send_to_room",
                     'payload': {
                         'type': MessageType.PLAYER_WIN,
-                        'player': self.channel_name
+                        'player': player_id
                     }
                 }
             )
-        else:
-            charStates = []
-            for i in range(0, 6):
-                if (word[i] == target_word[i]):
-                    charStates.append(CharState.CORRECT_PLACEMENT)
-                elif (target_word[i].__contains__(word[i])):
-                    charStates.append(CharState.CORRECT_LETTER)
-                else:
-                    charStates.append(CharState.INCORRECT)
-                changedBoard.board[Coordinate(row, i)] = word[i]
+            return
 
-            room[self.channel_name] = changedBoard
+        charStates = []
+        for i in range(0, 6):
+            if (word[i] == target_word[i]):
+                charStates.append(CharState.CORRECT_PLACEMENT)
+            elif (target_word[i].__contains__(word[i])):
+                charStates.append(CharState.CORRECT_LETTER)
+            else:
+                charStates.append(CharState.INCORRECT)
+            changedBoard.board[Coordinate(row, i)] = word[i]
 
-            print(charStates)
+        room[player_id] = changedBoard
 
-            # Send message to session group
-            await self.channel_layer.group_send(
-                self.room_id,
-                {
-                    'type': "send_to_room",
-                    'payload': {
-                        'type': MessageType.SUBMIT_WORD,
-                        'player': self.channel_name,
-                        'row': row,
-                        'values': charStates
-                    }
+        print(charStates)
+
+        # Send message to session group
+        # Does this work lmao?
+        await self.channel_layer.group_send(
+            room_id,
+            {
+                'type': "send_to_room",
+                'payload': {
+                    'type': MessageType.SUBMIT_WORD,
+                    'player': player_id,
+                    'row': row,
+                    'values': charStates
                 }
-            )
+            }
+        )
 
     # Receive message from room group
     async def send_to_room(self, event):

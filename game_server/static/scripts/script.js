@@ -5,7 +5,9 @@ var word = "HACKER";
 
 var won = false;
 
-var playerId = "";
+function getPlayerId() {
+	return document.getElementById('player-id').value;
+}
 const roomId = JSON.parse(document.getElementById('room-id').value);
 
 const roomSocket = new WebSocket(
@@ -103,7 +105,7 @@ function back() {
 		var tempGridPosition = currentGridPosition.split("");
 		tempGridPosition[1] = parseInt(tempGridPosition[1]) - 1;
 		tempGridPosition = tempGridPosition.join().replace(',','');
-		
+
 		lettersArray[items[0]].pop();
 		document.getElementById(tempGridPosition).innerHTML = '';
 		items[1] = items[1] - 1;
@@ -186,20 +188,36 @@ roomSocket.onmessage = function(e) {
 				currentGridPosition = items.join().replace(',', '');
 				break;
 			case "PLAYER_WIN":
-				if (playerId == data.payload.player) {
+				if (getPlayerId() == data.payload.player) {
 					alert("You won!");
 				} else {
 					alert("The opposing player won!");
 				}
+				break;
 		}
 		//document.querySelector('#chat-log').value += (data.message + '\n');
 };
 
 roomSocket.onclose = function(e) {
 		//document.querySelector('#chat-log').value += "*** CONNECTION CLOSED ***";
+		notifySocketClosed();
 		alert("*** CONNECTION CLOSED ***");
 		console.error('Game socket closed unexpectedly');
 };
+
+window.addEventListener('beforeunload', function (e) {
+	notifySocketClosed();
+});
+
+function notifySocketClosed() {
+	roomSocket.send(JSON.stringify({
+			'type': "DISCONNECTED",
+			'payload': {
+				'id': getPlayerId(),
+				'room': roomId
+			}
+	}));
+}
 
 roomSocket.onopen = function(e) {
 		//document.querySelector('#chat-log').value += "*** Connected to Room " + roomId + " ***";
