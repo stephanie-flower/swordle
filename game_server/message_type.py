@@ -2,6 +2,7 @@ from enum import Enum
 
 class MessageType(str, Enum):
     CONNECTION_OPENED = "CONNECTION_OPENED"
+    STATE_UPDATE = "STATE_UPDATE"
     SUBMIT_WORD = "SUBMIT_WORD"
     PLAYER_WIN = "PLAYER_WIN"
     DISCONNECTED = "DISCONNECTED"

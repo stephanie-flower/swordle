@@ -87,6 +87,34 @@ function activeRow(current) {
 	}
 }
 
+function updateUI() {
+	var overlay = document.getElementById("playfield-overlay");
+	var overlay_header = document.getElementById("playfield-header");
+
+	switch (gameState) {
+		case "NOT_STARTED":
+			overlay.style = "display: inline;";
+			overlay_header.innerText = "Connecting...";
+			break;
+
+		case "WAITING_FOR_PLAYERS":
+			overlay.style = "display: inline; color: yellow;";
+			overlay_header.innerText = "Waiting for players...";
+			break;
+
+		case "IN_GAME":
+			overlay.style = "display: none;";
+			overlay_header.innerText = "Playing...";
+			break;
+
+		case "GAME_OVER":
+			overlay.style = "display: inline; color: red;";
+			overlay_header.innerText = "Game Over";
+			break;
+
+	}
+}
+
 function enter() {
 	let items = currentGridPosition.split(""); //'01' -> ['0','1']
 	for (i=0; i<items.length; i++){
@@ -105,7 +133,12 @@ function enter() {
 				}
 		}));
 		console.log(currentGridPosition);
-		activeRow(parseInt(items[0]) + 1);
+
+		let items = currentGridPosition.split("");
+		items[0] = parseInt(items[0]) + 1;
+		items[1] = 0;
+		currentGridPosition = items.join().replace(',', '');
+		activeRow(parseInt(items[0]));
 		// Check on the server
 	}
 }
@@ -142,13 +175,10 @@ roomSocket.onmessage = function(e) {
 				break;
 			case "SUBMIT_WORD":
 				colourRow(data, (data.payload.player == playerId));
-
-				console.log(currentGridPosition)
-				let items = currentGridPosition.split("");
-				items[0] = parseInt(items[0]) + 1;
-				items[1] = 0;
-				currentGridPosition = items.join().replace(',', '');
-								console.log(currentGridPosition)
+				break;
+			case "STATE_UPDATE":
+				gameState = data.payload.state;
+				updateUI();
 				break;
 			case "PLAYER_WIN":
 				if (playerId == data.payload.player) {

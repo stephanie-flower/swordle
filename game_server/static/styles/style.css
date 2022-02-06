@@ -1,5 +1,6 @@
 body {
     background-color: #3A3A3A;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
 
 .title {
@@ -106,4 +107,55 @@ body {
 
 .keyrow:nth-child(3n) {
     margin-left: 80px;
+}
+
+.playfield-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.85);
+    background: url(data:;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAABl0RVh0U29mdHdhcmUAUGFpbnQuTkVUIHYzLjUuNUmK/OAAAAATSURBVBhXY2RgYNgHxGAAYuwDAA78AjwwRoQYAAAAAElFTkSuQmCC) repeat scroll transparent\9; /* ie fallback png background image */
+    z-index: 9999;
+    color: white;
+    text-align: center;
+    padding-top: 25%;
+    padding-bottom: 25%;
+}
+
+.main-content {
+    justify-content: center;
+    text-align: center;
+}
+
+.subtitle {
+    color: white;
+
+}
+
+.button {
+    background-color: #f09f26;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+}
+
+.footer {
+    position:fixed;
+    bottom:0;
+    left:0;
+    width:100%;
+    margin-top: 25%;
+    height: 22px;
+    background-color: #5c5c5c40;
+    color: #FFFFFF;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    text-align: center;
 }

@@ -10,12 +10,16 @@ from game_model.json_interfaces.view_state import CharState
 import pandas as pd
 
 from .message_type import MessageType
+from .game_state import GameState
 
 class GameSessionConsumer(AsyncWebsocketConsumer):
     # room_id -> dict of room to (dict of GameBoard to player)
     room_boards = {}
     # room_id -> dict of room to their target
     room_target = {}
+    # room_id -> game state
+    game_state = {}
+    # message_type -> function handler
     message_handlers = {}
 
     # Pandas-retrieved list of words
@@ -45,15 +49,28 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
         if current_rooms is None:
             current_rooms = {}
 
+        print(1)
+        print(current_rooms)
+        print(self.room_id)
+        print(self.channel_name)
+
         if self.room_id in current_rooms:
             if len(current_rooms[self.room_id]) >= 2:
                 return
             current_rooms[self.room_id].append(self.channel_name)
             self.room_boards[self.room_id][self.channel_name] = gBoard
+
+            self.game_state[self.room_id] = GameState.IN_GAME
         else:
             current_rooms[self.room_id] = [self.channel_name]
             self.room_boards[self.room_id] = {self.channel_name: gBoard}
             self.room_target[self.room_id] = self.get_random_word().upper()
+            self.game_state[self.room_id] = GameState.WAITING_FOR_PLAYERS
+
+        print(2)
+        print(current_rooms)
+        print(self.room_id)
+        print(self.channel_name)
 
         # Join session group with, giving the room_id and unique channel_name
         await self.channel_layer.group_add(
@@ -64,9 +81,7 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
         cache.set('current_rooms', current_rooms, None)
 
         print("!! STATE UPDATE !! - Player Connected!")
-        print(current_rooms)
-        print(self.room_id)
-        print(self.channel_name)
+        print("GameState: %s" % self.game_state[self.room_id])
 
         await self.accept()
 
@@ -76,6 +91,8 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
                 'id': self.channel_name
             }
         }))
+
+        await self.send_state_to_room(self.room_id)
 
     async def disconnect(self, close_code):
         pass
@@ -102,6 +119,22 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
             room_id,
             player_id
         )
+
+        print("!! STATE UPDATE !! - Player Disconnected!")
+
+        print("Room ID: %s\nPlayer Count: %s" % (room_id, current_rooms[room_id]))
+
+        if len(current_rooms[room_id]) - 1 <= 0:
+            del current_rooms[room_id]
+
+        if (room_id in current_rooms):
+            print("Room ID: %s\nNew Player Count: %s" % (room_id, current_rooms[room_id]))
+            self.game_state[room_id] = GameState.WAITING_FOR_PLAYERS
+        else:
+            print("Room deleted!")
+            self.game_state[room_id] = GameState.NOT_STARTED
+
+        await self.send_state_to_room(room_id)
 
         cache.set('current_rooms', current_rooms, None)
 
@@ -137,17 +170,31 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
                     }
                 }
             )
+
+            self.game_state[room_id] = GameState.GAME_OVER
+            await self.send_state_to_room(room_id)
             return
+        elif row == 5:
+            # This person has finished, check if other has finished too
+            rowHead = room.copy()
+            rowHead.pop(player_id)
+            otherBoard = rowHead[list(rowHead.keys())[0]]
+            print(otherBoard.board[Coordinate(5, 5)])
+            if otherBoard.board[Coordinate(5, 5)] == '':
+                # TODO: if not finished, start a timer to make game over appear
+                pass
+            else:
+                # if finished (not won), game over
+                self.game_state[room_id] = GameState.GAME_OVER
+                await self.send_state_to_room(room_id)
 
         print(target_word)
         print(word)
         charStates = []
         for i in range(0, 6):
-            print(word[i])
-            print(target_word[i])
-            if word[i] == target_word[i]:
+            if (word[i] == target_word[i]):
                 charStates.append(CharState.CORRECT_PLACEMENT)
-            elif word[i] in target_word:
+            elif (target_word.__contains__(word[i])):
                 charStates.append(CharState.CORRECT_LETTER)
             else:
                 charStates.append(CharState.INCORRECT)
@@ -168,6 +215,19 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
                     'player': player_id,
                     'row': row,
                     'values': charStates
+                }
+            }
+        )
+
+    async def send_state_to_room(self, room_id):
+        print(self.game_state[room_id])
+        await self.channel_layer.group_send(
+            self.room_id,
+            {
+                'type': "send_to_room",
+                'payload': {
+                    'type': MessageType.STATE_UPDATE,
+                    'state': self.game_state[room_id]
                 }
             }
         )
