@@ -5,8 +5,6 @@ var word = "HACKER";
 
 var won = false;
 
-
-
 const roomId = JSON.parse(document.getElementById('room-id').value);
 
 const roomSocket = new WebSocket(
@@ -39,6 +37,7 @@ function colourKey(key, colour) {
 
 function colourRow(response) {
 	var rightLetters = 0;
+	var guess = lettersArray[parseInt(currentGridPosition[0])];
 	const payload = response.payload;
 
 	for (var i = 0; i < payload.values.length; i++) {
