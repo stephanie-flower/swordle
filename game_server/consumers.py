@@ -35,11 +35,6 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
         if current_rooms is None:
             current_rooms = {}
 
-        print(1)
-        print(current_rooms)
-        print(self.room_id)
-        print(self.channel_name)
-
         if self.room_id in current_rooms:
             if len(current_rooms[self.room_id]) >= 2:
                 return
@@ -48,11 +43,6 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
         else:
             current_rooms[self.room_id] = [self.channel_name]
             self.room_boards[self.room_id] = {self.channel_name: gBoard}
-
-        print(2)
-        print(current_rooms)
-        print(self.room_id)
-        print(self.channel_name)
 
         # Join session group with, giving the room_id and unique channel_name
         await self.channel_layer.group_add(
@@ -63,6 +53,9 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
         cache.set('current_rooms', current_rooms, None)
 
         print("!! STATE UPDATE !! - Player Connected!")
+        print(current_rooms)
+        print(self.room_id)
+        print(self.channel_name)
 
         await self.accept()
 
@@ -147,9 +140,9 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
 
         charStates = []
         for i in range(0, 6):
-            if (word[i] == target_word[i]):
+            if word[i] == target_word[i]:
                 charStates.append(CharState.CORRECT_PLACEMENT)
-            elif (target_word[i].__contains__(word[i])):
+            elif word[i] in target_word:
                 charStates.append(CharState.CORRECT_LETTER)
             else:
                 charStates.append(CharState.INCORRECT)

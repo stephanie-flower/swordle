@@ -29,11 +29,26 @@ const roomSocket = new WebSocket(
 //	roomCode = 0000
 //};
 
-function colourSquare(position, colour) {
-	document.getElementById(position).style.backgroundColor = colour;
+var colours = {
+	"CORRECT_PLACEMENT" : 'green',
+	"CORRECT_LETTER" : 'orange',
+	"INCORRECT" : '#363636'
 }
 
-function colourKey(key, colour) {
+// Basically aliases to make their purpose more intuitive
+function colourSquare(position, colour, safe = true) {colourCell(position, colour, safe)}
+function colourKey(key, colour, safe = true) {colourCell(key, colour, safe)}
+function colourCell(key, colour, safe = true) {
+	if (safe) {
+		// If the old colour is default, we want to overwrite anyway
+		let oldColour = document.getElementById(key).style.backgroundColor;
+		if (oldColour != '') {
+			// Checks to make sure it isn't overwriting colour of higher value
+			let newLevel = Object.values(colours).indexOf(colour);
+			let oldLevel = Object.values(colours).indexOf(oldColour);
+			if (newLevel >= oldLevel) return;
+		}
+	}
 	document.getElementById(key).style.backgroundColor = colour;
 }
 
@@ -44,59 +59,15 @@ function colourRow(response, isForMe) {
 	let prefix = (isForMe) ? '' : 'o';
 
 	for (var i = 0; i < payload.values.length; i++) {
-		switch(payload.values[i]) {
-			case 'CORRECT_PLACEMENT':
-				colourSquare(prefix + response.payload.row + i, 'green');
-				// rightLetters += 1;
-				break;
-			case 'CORRECT_LETTER':
-				colourSquare(prefix + response.payload.row + i, 'orange');
-				if (isForMe) colourKey(guess[i],'orange');
-				break;
-			case 'INCORRECT':
-				colourSquare(prefix + response.payload.row + i, '#363636');
-				if (isForMe) colourKey(guess[i], '#363636');
-				break;
-		}
-	}
-
-	// if (rightLetters == 6) {
-	// 	won = true;
-	// 	document.getElementById('win').innerHTML = "you won";
-	// }
-}
-
-
-function _colourRow(response) {
-	var rightLetters = 0;
-	wordArray = word.split("");
-	guess = lettersArray[parseInt(currentGridPosition[0])];
-	if (currentGridPosition == '55') {
-		//document.getElementById('win').innerHTML = "you lose";
-		won = false;
-	} else {
-		for (i=0; i<wordArray.length; i++) {
-			if (wordArray[i] == guess[i]) {
-				colourSquare(currentGridPosition[0] + i, 'green');
-				rightLetters += 1;
-			} else if(wordArray.includes(guess[i])){
-				colourSquare(currentGridPosition[0] + i, 'orange');
-				colourKey(guess[i],'orange');
-			} else {
-				colourSquare(currentGridPosition[0] + i, '#363636');
-				colourKey(guess[i],'#363636');
-			}
-		}
-		if (rightLetters == 6) {
-			won = true;
-			document.getElementById('win').innerHTML = "you won";
-		}
+		colourSquare(prefix + response.payload.row + i, colours[payload.values[i]]);
+		if (isForMe && payload.values[i] != 'CORRECT_PLACEMENT')
+			colourKey(guess[i], colours[payload.values[i]]);
 	}
 }
 
 function back() {
 	console.log('back');
-	items = currentGridPosition.split(""); //'01' -> ['0','1']
+	let items = currentGridPosition.split(""); //'01' -> ['0','1']
 	for (i=0; i<items.length; i++){
 		items[i] = parseInt(items[i]); //['0','1'] -> [0,1]
 	}
@@ -130,7 +101,7 @@ function activeRow(current) {
 }
 
 function enter() {
-	items = currentGridPosition.split(""); //'01' -> ['0','1']
+	let items = currentGridPosition.split(""); //'01' -> ['0','1']
 	for (i=0; i<items.length; i++){
 		items[i] = parseInt(items[i]); //['0','1'] -> [0,1]
 	}
@@ -155,14 +126,14 @@ function enter() {
 function selectLetter(letter) {
 	console.log(lettersArray);
 	console.log(currentGridPosition);
-	currentGrid = document.getElementById(currentGridPosition);
-	currentGrid.innerHTML = letter;
 	if (lettersArray[parseInt(currentGridPosition[0])].length < 6) {
+		currentGrid = document.getElementById(currentGridPosition);
+		currentGrid.innerHTML = letter;
 		lettersArray[parseInt(currentGridPosition[0])].push(letter);
 	}
 
 	// nextItem
-	items = currentGridPosition.split(""); //'01' -> ['0','1']
+	let items = currentGridPosition.split(""); //'01' -> ['0','1']
 	for (i=0; i<items.length; i++){
 		items[i] = parseInt(items[i]); //['0','1'] -> [0,1]
 	}
@@ -185,6 +156,7 @@ roomSocket.onmessage = function(e) {
 			case "SUBMIT_WORD":
 				colourRow(data, (data.payload.player == playerId));
 
+				let items = currentGridPosition.split("");
 				items[0] += 1;
 				items[1] = 0;
 				currentGridPosition = items.join().replace(',', '');
