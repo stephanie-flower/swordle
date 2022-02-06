@@ -97,7 +97,18 @@ function back() {
 	for (i=0; i<items.length; i++){
 		items[i] = parseInt(items[i]); //['0','1'] -> [0,1]
 	}
-	if (items[1] != 0) {
+
+	if (items[1] == 6) {
+		var tempGridPosition = currentGridPosition.split("");
+		tempGridPosition[1] = parseInt(tempGridPosition[1]) - 1;
+		tempGridPosition = tempGridPosition.join().replace(',','');
+		
+		lettersArray[items[0]].pop();
+		document.getElementById(tempGridPosition).innerHTML = '';
+		items[1] = items[1] - 1;
+		currentGridPosition = items.join().replace(',','');
+	}
+	else if (items[1] != 0) {
 		lettersArray[items[0]].pop();
 		document.getElementById(currentGridPosition).innerHTML = '';
 		items[1] = items[1] - 1;
