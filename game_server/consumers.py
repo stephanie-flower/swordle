@@ -127,12 +127,13 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
         if len(current_rooms[room_id]) - 1 <= 0:
             del current_rooms[room_id]
 
-        if (room_id in current_rooms):
-            print("Room ID: %s\nNew Player Count: %s" % (room_id, current_rooms[room_id]))
-            self.game_state[room_id] = GameState.WAITING_FOR_PLAYERS
-        else:
-            print("Room deleted!")
-            self.game_state[room_id] = GameState.NOT_STARTED
+        if (self.game_state[room_id] != GameState.GAME_OVER):
+            if (room_id in current_rooms):
+                print("Room ID: %s\nNew Player Count: %s" % (room_id, current_rooms[room_id]))
+                self.game_state[room_id] = GameState.WAITING_FOR_PLAYERS
+            else:
+                print("Room deleted!")
+                self.game_state[room_id] = GameState.NOT_STARTED
 
         await self.send_state_to_room(room_id)
 

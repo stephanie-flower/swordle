@@ -109,7 +109,8 @@ function updateUI() {
 
 		case "GAME_OVER":
 			overlay.style = "display: inline; color: red;";
-			overlay_header.innerText = "Game Over";
+			//overlay_header.innerText = "Game Over";
+			overlay_header.innerHTML = "Game Over <a href='/room'> <- Back to home </a>"
 			break;
 
 	}
