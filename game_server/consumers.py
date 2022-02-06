@@ -75,32 +75,22 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
 
         current_rooms = cache.get('current_rooms')
 
-        print(3)
+        print("!! STATE UPDATE !! - Player Disconnected!")
         print(current_rooms)
         print(room_id)
         print(player_id)
 
         if player_id in current_rooms[room_id]:
-            current_rooms[room_id].remove(player_id);
+            current_rooms[room_id].remove(player_id)
+
+        if len(current_rooms[room_id]) == 0:
+            del current_rooms[room_id]
+
         # Leave session group
         await self.channel_layer.group_discard(
             room_id,
             player_id
         )
-
-        print("!! STATE UPDATE !! - Player Disconnected!")
-
-        current_rooms = cache.get('current_rooms')
-
-        print("Room ID: %s\nPlayer Count: %s" % (room_id, current_rooms[room_id]))
-
-        if len(current_rooms[room_id]) - 1 <= 0:
-            del current_rooms[room_id]
-
-        if (room_id in current_rooms):
-            print("Room ID: %s\nNew Player Count: %s" % (room_id, current_rooms[room_id]))
-        else:
-            print("Room deleted!")
 
         cache.set('current_rooms', current_rooms, None)
 
