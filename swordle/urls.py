@@ -17,6 +17,7 @@ from django.contrib import admin
 from django.urls import include, path
 
 urlpatterns = [
+    path('', include('game_server.urls')),
     path('room/', include('game_server.urls')),
     path('admin/', admin.site.urls),
 ]
