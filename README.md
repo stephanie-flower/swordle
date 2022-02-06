@@ -1,7 +1,7 @@
 # swordle
 A online competitive multiplayer Wordle game
 
-## How to run (in development mode)
+## How to run locally (in development mode)
 
 1. Install prerequisites
     1. [Python 3.10](https://python.org/)
@@ -9,4 +9,8 @@ A online competitive multiplayer Wordle game
     OR
     2. [Redis](https://redis.io/)
 
-### Hackaway v5
+## How to play online
+
+visit https://swordle.uk.to/
+
+### Royal Hackaway v5
