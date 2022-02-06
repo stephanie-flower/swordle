@@ -7,7 +7,6 @@ var won = false;
 
 
 
-
 const roomId = JSON.parse(document.getElementById('room-id').value);
 
 const roomSocket = new WebSocket(
@@ -90,22 +89,11 @@ function activeRow(current) {
 }
 
 function enter() {
-
-
-	/*const messageInputDom = document.querySelector('#chat-input');
-	const message = messageInputDom.value;
-	roomSocket.send(JSON.stringify({
-			'message': message
-	}));
-	messageInputDom.value = '';*/
-
-
 	items = currentGridPosition.split(""); //'01' -> ['0','1']
 	for (i=0; i<items.length; i++){
 		items[i] = parseInt(items[i]); //['0','1'] -> [0,1]
 	}
 	if (items[1] == 6) {
-		alert('e');
 		// Send a request to the server with this data
 		let currentRow = currentGridPosition[0];
 		roomSocket.send(JSON.stringify({
@@ -146,10 +134,14 @@ function selectLetter(letter) {
 roomSocket.onmessage = function(e) {
 		const data = JSON.parse(e.data);
 		// Display the state of the row
-
-		items[0] += 1;
-		items[1] = 0;
-		currentGridPosition = items.join().replace(',', '')
+		switch (data['type']) {
+			case "CONNECTION_OPENED":
+				document.getElementById('player-id').value = data['id'];
+			case "SUBMIT_WORD":
+				items[0] += 1;
+				items[1] = 0;
+				currentGridPosition = items.join().replace(',', '');
+		}
 		//document.querySelector('#chat-log').value += (data.message + '\n');
 };
 
@@ -161,15 +153,5 @@ roomSocket.onclose = function(e) {
 
 roomSocket.onopen = function(e) {
 		//document.querySelector('#chat-log').value += "*** Connected to Room " + roomId + " ***";
-
 		//console.error('Game socket closed unexpectedly');
-};
-
-document.querySelector('#chat-submit').onclick = function(e) {
-		const messageInputDom = document.querySelector('#chat-input');
-		const message = messageInputDom.value;
-		roomSocket.send(JSON.stringify({
-				'message': message
-		}));
-		messageInputDom.value = '';
 };

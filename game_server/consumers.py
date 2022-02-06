@@ -17,7 +17,6 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(self, *args, **kwargs)
-        self.message_handlers[MessageType.KEY_INPUT] = self.key_input_handler
         self.message_handlers[MessageType.SUBMIT_WORD] = self.word_submit_handler
 
     async def connect(self):
@@ -56,8 +55,15 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
 
         await self.accept()
 
+        await self.send(text_data=json.dumps({
+            'type': MessageType.CONNECTION_OPENED,
+            'id': self.channel_name
+        }))
+
     async def disconnect(self, close_code):
-        self.room_count[self.room_id] -= 1;
+        current_rooms = cache.get('current_rooms')
+        if self.channel_name in current_rooms[self.room_id]:
+            current_rooms[self.room_id].remove(self.channel_name);
         # Leave session group
         await self.channel_layer.group_discard(
             self.room_id,
@@ -119,8 +125,9 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_send(
             self.room_id,
             {
-                'type': 'send_to_room',
+                'type': "send_to_room",
                 'payload': {
+                    'type': MessageType.SUBMIT_WORD,
                     'player': self.channel_name,
                     'row': row,
                     'values': charStates
@@ -128,20 +135,9 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
             }
         )
 
-    async def key_input_handler(self, json_data):
-        message = json_data['payload']
-        # Send message to session group
-        await self.channel_layer.group_send(
-            self.room_id,
-            {
-                'type': 'send_to_room',
-                'payload': message
-            }
-        )
-
     # Receive message from room group
     async def send_to_room(self, event):
         # Send message to WebSocket
         await self.send(text_data=json.dumps({
-            'payload': event
+            'payload': event['payload']
         }))
