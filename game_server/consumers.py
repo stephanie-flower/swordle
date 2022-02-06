@@ -53,7 +53,7 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
         else:
             current_rooms[self.room_id] = [self.channel_name]
             self.room_boards[self.room_id] = {self.channel_name: gBoard}
-            self.room_target[self.room_id] = self.get_random_word()
+            self.room_target[self.room_id] = self.get_random_word().upper()
 
         # Join session group with, giving the room_id and unique channel_name
         await self.channel_layer.group_add(
@@ -119,11 +119,13 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
         row = int(payload['row'])
         word = payload['word'].upper()
 
+        target_word = self.room_target[room_id]
+
         # Change the correct board to have the charStates and update
         room = self.room_boards[room_id]
         changedBoard = room[player_id]
 
-        if word == room_target[room_id]:
+        if word == target_word:
             # Send message to session group
             await self.channel_layer.group_send(
                 room_id,
@@ -137,8 +139,12 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
             )
             return
 
+        print(target_word)
+        print(word)
         charStates = []
         for i in range(0, 6):
+            print(word[i])
+            print(target_word[i])
             if word[i] == target_word[i]:
                 charStates.append(CharState.CORRECT_PLACEMENT)
             elif word[i] in target_word:
