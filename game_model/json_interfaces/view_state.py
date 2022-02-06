@@ -6,10 +6,10 @@ from enum import Enum
 from game_model.custom_types import JsonStr
 
 
-class CharState(Enum):
-    CORRECT_PLACEMENT = auto()
-    CORRECT_LETTER = auto()
-    INCORRECT = auto()
+class CharState(str, Enum):
+    CORRECT_PLACEMENT = "CORRECT_PLACEMENT"
+    CORRECT_LETTER = "CORRECT_LETTER"
+    INCORRECT = "INCORRECT"
 
 
 @dataclasses.dataclass(frozen=True)

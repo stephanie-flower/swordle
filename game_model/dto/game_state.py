@@ -19,7 +19,7 @@ class GameBoard:
 class GameState:
     """The true game state."""
 
-    boards: dict[str, GameBoard]
+    boards: list[GameBoard]
 
 
 def update_game_state(
