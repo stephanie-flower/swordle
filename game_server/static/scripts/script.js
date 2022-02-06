@@ -39,7 +39,7 @@ function colourKey(key, colour) {
 
 function colourRow(response) {
 	var rightLetters = 0;
-	const payload = response.payload.payload;
+	const payload = response.payload;
 
 	for (var i = 0; i < payload.values.length; i++) {
 		switch(payload.values[i]) {
@@ -168,7 +168,7 @@ roomSocket.onmessage = function(e) {
 				break;
 			case "SUBMIT_WORD":
 				colourRow(JSON.parse(e.data));
-				
+
 				items[0] += 1;
 				items[1] = 0;
 				currentGridPosition = items.join().replace(',', '');

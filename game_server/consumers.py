@@ -56,8 +56,10 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
         await self.send(text_data=json.dumps({
-            'type': MessageType.CONNECTION_OPENED,
-            'id': self.channel_name
+            'payload': {
+                'type': MessageType.CONNECTION_OPENED,
+                'id': self.channel_name
+            }
         }))
 
     async def disconnect(self, close_code):
@@ -76,7 +78,7 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
 
         print("Room ID: %s\nPlayer Count: %s" % (self.room_id, current_rooms[self.room_id]))
 
-        if (current_rooms[self.room_id] - 1) > 0:
+        if len(current_rooms[self.room_id]) - 1 > 0:
             current_rooms[self.room_id] -= 1
         else:
             del current_rooms[self.room_id]
