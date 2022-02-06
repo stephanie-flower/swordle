@@ -77,9 +77,8 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
         pass
 
     async def actual_disconnect(self, json_data):
-        payload = json_data['payload']
-        room_id = str(payload['room'])
-        player_id = payload['id']
+        room_id = str(json_data['room'])
+        player_id = json_data['id']
 
         current_rooms = cache.get('current_rooms')
 
@@ -121,8 +120,8 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
 
     async def word_submit_handler(self, json_data):
         payload = json_data['payload']
-        room_id = str(payload['room'])
-        player_id = payload['id']
+        room_id = str(json_data['room'])
+        player_id = json_data['id']
         row = int(payload['row'])
         word = payload['word'].upper()
 

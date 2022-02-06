@@ -139,9 +139,11 @@ function enter() {
 		let currentRow = currentGridPosition[0];
 		roomSocket.send(JSON.stringify({
 				'type': "SUBMIT_WORD",
+				'id': getPlayerId(),
+				'room': roomId,
 				'payload': {
 					'word': lettersArray[currentRow].join(""),
-					'row': currentRow
+					'row': currentRow,
 				}
 		}));
 		console.log(currentGridPosition);
@@ -212,10 +214,8 @@ window.addEventListener('beforeunload', function (e) {
 function notifySocketClosed() {
 	roomSocket.send(JSON.stringify({
 			'type': "DISCONNECTED",
-			'payload': {
-				'id': getPlayerId(),
-				'room': roomId
-			}
+			'id': getPlayerId(),
+			'room': roomId
 	}));
 }
 
