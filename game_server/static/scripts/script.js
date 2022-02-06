@@ -38,10 +38,29 @@ function colourKey(key, colour) {
 }
 
 function colourRow(response) {
-	const payload = data.payload.payload;
+	var rightLetters = 0;
+	const payload = response.payload.payload;
 
 	for (var i = 0; i < payload.values.length; i++) {
+		switch(payload.values[i]) {
+			case 'CORRECT_PLACEMENT':
+				colourSquare(currentGridPosition[0] + i, 'green');
+				rightLetters += 1;
+				break;
+			case 'CORRECT_LETTER':
+				colourSquare(currentGridPosition[0] + i, 'orange');
+				colourKey(guess[i],'orange');
+				break;
+			case 'INCORRECT':
+				colourSquare(currentGridPosition[0] + i, '#363636');
+				colourKey(guess[i],'#363636');
+				break;
+		}
+	}
 
+	if (rightLetters == 6) {
+		won = true;
+		document.getElementById('win').innerHTML = "you won";
 	}
 }
 
@@ -143,14 +162,17 @@ function selectLetter(letter) {
 roomSocket.onmessage = function(e) {
 		// Display the state of the row
 		const data = JSON.parse(e.data);
-		switch (data['type']) {
+		switch (data.payload.type) {
 			case "CONNECTION_OPENED":
 				document.getElementById('player-id').value = data['id'];
+				break;
 			case "SUBMIT_WORD":
+				colourRow(JSON.parse(e.data));
+				
 				items[0] += 1;
 				items[1] = 0;
 				currentGridPosition = items.join().replace(',', '');
-				colourRow(JSON.parse(e.data));
+				break;
 		}
 		//document.querySelector('#chat-log').value += (data.message + '\n');
 };
