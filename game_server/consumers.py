@@ -106,7 +106,7 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
         print(player_id)
 
         if player_id in current_rooms[room_id]:
-            current_rooms[room_id].remove(player_id);
+            current_rooms[room_id].remove(player_id)
         # Leave session group
         await self.channel_layer.group_discard(
             room_id,
@@ -124,8 +124,21 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
 
         if (room_id in current_rooms):
             print("Room ID: %s\nNew Player Count: %s" % (room_id, current_rooms[room_id]))
+            self.game_state = GameState.WAITING_FOR_PLAYERS
         else:
             print("Room deleted!")
+            self.game_state = GameState.NOT_STARTED
+
+        await self.channel_layer.group_send(
+            self.room_id,
+            {
+                'type': "send_to_room",
+                'payload': {
+                    'type': MessageType.STATE_UPDATE,
+                    'state': self.game_state
+                }
+            }
+        )
 
         cache.set('current_rooms', current_rooms, None)
 
@@ -161,6 +174,19 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
                     }
                 }
             )
+
+            self.game_state = GameState.GAME_OVER
+
+            await self.channel_layer.group_send(
+            self.room_id,
+            {
+                'type': "send_to_room",
+                'payload': {
+                    'type': MessageType.STATE_UPDATE,
+                    'state': self.game_state
+                }
+            }
+        )
             return
 
         charStates = []
