@@ -1,8 +1,6 @@
 var currentGridPosition = '00';
 var lettersArray = [[],[],[],[],[],[]];
 
-var word = "HACKER";
-
 var won = false;
 
 const roomId = JSON.parse(document.getElementById('room-id').value);
@@ -61,33 +59,9 @@ function colourRow(response) {
 		won = true;
 		document.getElementById('win').innerHTML = "you won";
 	}
-}
-
-
-function _colourRow(response) {
-	var rightLetters = 0;
-	wordArray = word.split("");
-	guess = lettersArray[parseInt(currentGridPosition[0])];
 	if (currentGridPosition == '55') {
-		//document.getElementById('win').innerHTML = "you lose";
 		won = false;
-	} else {
-		for (i=0; i<wordArray.length; i++) {
-			if (wordArray[i] == guess[i]) {
-				colourSquare(currentGridPosition[0] + i, 'green');
-				rightLetters += 1;
-			} else if(wordArray.includes(guess[i])){
-				colourSquare(currentGridPosition[0] + i, 'orange');
-				colourKey(guess[i],'orange');
-			} else {
-				colourSquare(currentGridPosition[0] + i, '#363636');
-				colourKey(guess[i],'#363636');
-			}
-		}
-		if (rightLetters == 6) {
-			won = true;
-			document.getElementById('win').innerHTML = "you won";
-		}
+		document.getElementById('win').innerHTML = "you lose";
 	}
 }
 
@@ -98,21 +72,11 @@ function back() {
 		items[i] = parseInt(items[i]); //['0','1'] -> [0,1]
 	}
 
-	if (items[1] == 6) {
-		var tempGridPosition = currentGridPosition.split("");
-		tempGridPosition[1] = parseInt(tempGridPosition[1]) - 1;
-		tempGridPosition = tempGridPosition.join().replace(',','');
-		
-		lettersArray[items[0]].pop();
-		document.getElementById(tempGridPosition).innerHTML = '';
+	if (items[1] > 0) {
 		items[1] = items[1] - 1;
 		currentGridPosition = items.join().replace(',','');
-	}
-	else if (items[1] != 0) {
 		lettersArray[items[0]].pop();
 		document.getElementById(currentGridPosition).innerHTML = '';
-		items[1] = items[1] - 1;
-		currentGridPosition = items.join().replace(',','');
 	} else {
 		document.getElementById(currentGridPosition).innerHTML = '';
 	}
@@ -150,9 +114,9 @@ function enter() {
 function selectLetter(letter) {
 	console.log(lettersArray);
 	console.log(currentGridPosition);
-	currentGrid = document.getElementById(currentGridPosition);
-	currentGrid.innerHTML = letter;
 	if (lettersArray[parseInt(currentGridPosition[0])].length < 6) {
+		currentGrid = document.getElementById(currentGridPosition);
+		currentGrid.innerHTML = letter;
 		lettersArray[parseInt(currentGridPosition[0])].push(letter);
 	}
 
