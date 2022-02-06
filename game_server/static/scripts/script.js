@@ -158,11 +158,18 @@ roomSocket.onmessage = function(e) {
 				}
 				break;
 		}
-		//document.querySelector('#chat-log').value += (data.message + '\n');
 };
 
+document.addEventListener('keydown', function(event) {
+    if(event.keyCode == 37) {
+        alert('Left was pressed');
+    }
+    else if(event.keyCode == 39) {
+        alert('Right was pressed');
+    }
+});
+
 roomSocket.onclose = function(e) {
-		//document.querySelector('#chat-log').value += "*** CONNECTION CLOSED ***";
 		notifySocketClosed();
 		alert("*** CONNECTION CLOSED ***");
 		console.error('Game socket closed unexpectedly');
@@ -179,6 +186,20 @@ function notifySocketClosed() {
 			'room': roomId
 	}));
 }
+
+document.addEventListener('keyup', function(event) {
+		let key = event.keyCode;
+    if(key > 64 && key <= 90) {
+				// keyCode same as ASCII for A-Z
+        selectLetter(String.fromCharCode(key));
+    } else if(key	== 13) {
+				// Enter was pressed
+        enter();
+    } else if(key == 8) {
+				// Backspace was pressed
+        back();
+    }
+});
 
 roomSocket.onopen = function(e) {
 		//document.querySelector('#chat-log').value += "*** Connected to Room " + roomId + " ***";
