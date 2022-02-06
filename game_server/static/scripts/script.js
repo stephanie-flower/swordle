@@ -110,7 +110,7 @@ function updateUI(payload) {
 		case "GAME_OVER":
 			overlay.style = "display: inline; color: red;";
 			//overlay_header.innerText = "Game Over";
-			overlay_header.innerHTML = "Game Over <a href='/room'> <- Back to home </a>"
+			overlay_header.innerHTML = "Game Over<br /><a href='/'> <- Back to home </a>"
 			alert(payload.solution);
 			break;
 
@@ -179,6 +179,8 @@ roomSocket.onmessage = function(e) {
 				colourRow(data, (data.payload.player == playerId));
 				break;
 			case "STATE_UPDATE":
+				if (data.payload.room != roomId) return;
+
 				gameState = data.payload.state;
 				updateUI(data.payload);
 				break;
