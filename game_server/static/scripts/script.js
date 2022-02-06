@@ -142,6 +142,7 @@ function selectLetter(letter) {
 
 roomSocket.onmessage = function(e) {
 		// Display the state of the row
+		const data = JSON.parse(e.data);
 		switch (data['type']) {
 			case "CONNECTION_OPENED":
 				document.getElementById('player-id').value = data['id'];
