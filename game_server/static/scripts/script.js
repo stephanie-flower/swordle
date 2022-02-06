@@ -5,9 +5,8 @@ var word = "HACKER";
 
 var won = false;
 
-function getPlayerId() {
-	return document.getElementById('player-id').value;
-}
+// Effectively const, do not write to this
+var playerId;
 const roomId = JSON.parse(document.getElementById('room-id').value);
 
 const roomSocket = new WebSocket(
@@ -38,24 +37,25 @@ function colourKey(key, colour) {
 	document.getElementById(key).style.backgroundColor = colour;
 }
 
-function colourRow(response) {
+function colourRow(response, isForMe) {
 	var rightLetters = 0;
 	var guess = lettersArray[parseInt(currentGridPosition[0])];
 	const payload = response.payload;
+	let prefix = (isForMe) ? '' : 'o';
 
 	for (var i = 0; i < payload.values.length; i++) {
 		switch(payload.values[i]) {
 			case 'CORRECT_PLACEMENT':
-				colourSquare(currentGridPosition[0] + i, 'green');
+				colourSquare(prefix + response.payload.row + i, 'green');
 				// rightLetters += 1;
 				break;
 			case 'CORRECT_LETTER':
-				colourSquare(currentGridPosition[0] + i, 'orange');
-				colourKey(guess[i],'orange');
+				colourSquare(prefix + response.payload.row + i, 'orange');
+				if (isForMe) colourKey(guess[i],'orange');
 				break;
 			case 'INCORRECT':
-				colourSquare(currentGridPosition[0] + i, '#363636');
-				colourKey(guess[i],'#363636');
+				colourSquare(prefix + response.payload.row + i, '#363636');
+				if (isForMe) colourKey(guess[i], '#363636');
 				break;
 		}
 	}
@@ -139,7 +139,7 @@ function enter() {
 		let currentRow = currentGridPosition[0];
 		roomSocket.send(JSON.stringify({
 				'type': "SUBMIT_WORD",
-				'id': getPlayerId(),
+				'id': playerId,
 				'room': roomId,
 				'payload': {
 					'word': lettersArray[currentRow].join(""),
@@ -183,14 +183,14 @@ roomSocket.onmessage = function(e) {
 				playerId = data.payload.id;
 				break;
 			case "SUBMIT_WORD":
-				colourRow(JSON.parse(e.data));
+				colourRow(data, (data.payload.player == playerId));
 
 				items[0] += 1;
 				items[1] = 0;
 				currentGridPosition = items.join().replace(',', '');
 				break;
 			case "PLAYER_WIN":
-				if (getPlayerId() == data.payload.player) {
+				if (playerId == data.payload.player) {
 					alert("You won!");
 				} else {
 					alert("The opposing player won!");
@@ -214,7 +214,7 @@ window.addEventListener('beforeunload', function (e) {
 function notifySocketClosed() {
 	roomSocket.send(JSON.stringify({
 			'type': "DISCONNECTED",
-			'id': getPlayerId(),
+			'id': playerId,
 			'room': roomId
 	}));
 }
