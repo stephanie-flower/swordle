@@ -30,7 +30,7 @@ with open(".env", "r") as f:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['localhost', '34.89.28.142']
+ALLOWED_HOSTS = ['localhost', '34.89.28.142', 'swordle.uk.to']
 STATIC_ROOT = "/var/www/html/static/" 
 
 # Application definition
