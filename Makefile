@@ -1,6 +1,6 @@
 
 # Python config
-PYTHON_VERSION := 3.10
+PYTHON_VERSION := 3.9
 PYTHON_BIN := python$(PYTHON_VERSION)
 
 # Environment config
