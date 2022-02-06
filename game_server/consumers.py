@@ -4,17 +4,21 @@ from threading import currentThread
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.shortcuts import redirect
 from django.core.cache import cache
+from game_model.dto.game_state import Coordinate
+from game_model.dto.game_state import GameBoard
+from game_model.dto.game_state import GameState
 
 from .message_type import MessageType
 
 class GameSessionConsumer(AsyncWebsocketConsumer):
-    # room_id -> array of GameBoard
+    # room_id -> GameState (array of GameBoard)
     room_boards = {}
     message_handlers = {}
 
     def __init__(self, *args, **kwargs):
         super().__init__(self, *args, **kwargs)
         self.message_handlers[MessageType.KEY_INPUT] = self.key_input_handler
+        self.message_handlers[MessageType.SUBMIT_WORD] = self.word_submit_handler
 
     async def connect(self):
         self.room_id = self.scope['url_route']['kwargs']['room_id']
@@ -35,18 +39,10 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
             if len(current_rooms[self.room_id]) >= 2:
                 return
             current_rooms[self.room_id].append(self.channel_name)
-            self.room_boards[self.room_id].append(gBoard)
+            self.room_boards[self.room_id].boards.append(gBoard)
         else:
             current_rooms[self.room_id] = [self.channel_name]
-            self.room_boards[self.room_id] = [gBoard]
-
-        if self.room_id in current_rooms:
-            if current_rooms[self.room_id] >= 2:
-                await self.disconnect()
-                return
-            current_rooms[self.room_id] += 1
-        else:
-            current_rooms[self.room_id] = 1
+            self.room_boards[self.room_id] = GameState([gBoard])
 
         # Join session group with, giving the room_id and unique channel_name
         await self.channel_layer.group_add(
@@ -93,23 +89,45 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
         print(json_data)
         await self.message_handlers[MessageType.KEY_INPUT](json_data)
 
-    async def key_input_handler(self, json_data):
-        message = json_data['message']
+    async def word_submit_handler(self, json_data):
+        payload = json_data['payload']
+        print(payload)
+
+        # Record input as true state object
+        true_state = _as_update_true_state_dto({
+            player_no: self.channel_name,
+            row: int(payload['row']),
+            values: [c for c in upper(payload['word'])]
+        })
+
+        # Replace current game state with the evaluation of the true state object
+        self.room_boards[self.channel_name] = update_game_state(self.room_boards[self.channel_name], true_state)
+
+
+
         # Send message to session group
-        print(message)
         await self.channel_layer.group_send(
             self.room_id,
             {
-                'type': 'chat_message',
+                'type': 'send_to_room',
+                'message': word == "HACKS"
+            }
+        )
+
+    async def key_input_handler(self, json_data):
+        message = json_data['payload']
+        # Send message to session group
+        await self.channel_layer.group_send(
+            self.room_id,
+            {
+                'type': 'send_to_room',
                 'message': message
             }
         )
 
     # Receive message from room group
-    async def chat_message(self, event):
-        message = event['message']
-
+    async def send_to_room(self, event):
         # Send message to WebSocket
         await self.send(text_data=json.dumps({
-            'message': message
+            'payload': event
         }))

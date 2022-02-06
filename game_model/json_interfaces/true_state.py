@@ -2,24 +2,23 @@ import dataclasses
 import json
 
 from game_model.custom_types import JsonStr
+from game_model.custom_types import Char
 
 
 @dataclasses.dataclass(frozen=True)
 class UpdateTrueStateDTO:
     """An update to the game state (Player -> Server)"""
 
-    player_no: int
+    player: str
     row: int
-    col: int
-    value: str
+    values: list[Char]
 
 
 def _as_update_true_state_dto(dct: dict) -> UpdateTrueStateDTO:
-    player_no = dct["player_no"]
+    player = dct["player_no"]
     row = dct["row"]
-    col = dct["col"]
-    value = dct["value"]
-    return UpdateTrueStateDTO(player_no, row, col, value)
+    values = dct["values"]
+    return UpdateTrueStateDTO(player, row, values)
 
 
 def parse_update_request(json_str: JsonStr) -> UpdateTrueStateDTO:

@@ -44,7 +44,7 @@ function checkWord() {
 				colourSquare(currentGridPosition[0] + i, '#363636');
 				colourKey(guess[i],'#363636');
 			}
-		} 
+		}
 		if (rightLetters == 6) {
 			won = true;
 			document.getElementById('win').innerHTML = "you won";
@@ -77,17 +77,31 @@ function activeRow(current) {
 }
 
 function enter() {
+
+
+	/*const messageInputDom = document.querySelector('#chat-input');
+	const message = messageInputDom.value;
+	roomSocket.send(JSON.stringify({
+			'message': message
+	}));
+	messageInputDom.value = '';*/
+
+
 	items = currentGridPosition.split(""); //'01' -> ['0','1']
 	for (i=0; i<items.length; i++){
 		items[i] = parseInt(items[i]); //['0','1'] -> [0,1]
 	}
-	if (items[1] == 5) {
+	if (items[1] == 7) {
+		alert('e');
+		// Send a request to the server with this data
+		let currentRow = currentGridPosition[0];
+		roomSocket.send(JSON.stringify({
+				'type': "SUBMIT_WORD",
+				'payload': lettersArray[currentRow].join("")
+		}));
 		console.log(currentGridPosition);
 		activeRow(items[0] + 1);
-		checkWord(lettersArray[items[0]]);
-		items[0] += 1;
-		items[1] = 0;
-		currentGridPosition = items.join().replace(',', '')
+		// Check on the server
 	}
 }
 
@@ -99,7 +113,7 @@ function selectLetter(letter) {
 	if (lettersArray[parseInt(currentGridPosition[0])].length < 6) {
 		lettersArray[parseInt(currentGridPosition[0])].push(letter);
 	}
-	
+
 	// nextItem
 	items = currentGridPosition.split(""); //'01' -> ['0','1']
 	for (i=0; i<items.length; i++){
@@ -110,3 +124,46 @@ function selectLetter(letter) {
 		currentGridPosition = items.join().replace(',','');
 	}
 }
+
+// SOCKET STUFF
+
+const roomId = JSON.parse(document.getElementById('room-id').textContent);
+
+const roomSocket = new WebSocket(
+		'ws://'
+		+ window.location.host
+		+ '/ws/session/'
+		+ roomId
+		+ '/'
+);
+
+roomSocket.onmessage = function(e) {
+		const data = JSON.parse(e.data);
+		// Display the state of the row
+
+		items[0] += 1;
+		items[1] = 0;
+		currentGridPosition = items.join().replace(',', '')
+		//document.querySelector('#chat-log').value += (data.message + '\n');
+};
+
+roomSocket.onclose = function(e) {
+		//document.querySelector('#chat-log').value += "*** CONNECTION CLOSED ***";
+		alert("*** CONNECTION CLOSED ***");
+		console.error('Game socket closed unexpectedly');
+};
+
+roomSocket.onopen = function(e) {
+		//document.querySelector('#chat-log').value += "*** Connected to Room " + roomId + " ***";
+
+		//console.error('Game socket closed unexpectedly');
+};
+
+document.querySelector('#chat-submit').onclick = function(e) {
+		const messageInputDom = document.querySelector('#chat-input');
+		const message = messageInputDom.value;
+		roomSocket.send(JSON.stringify({
+				'message': message
+		}));
+		messageInputDom.value = '';
+};
