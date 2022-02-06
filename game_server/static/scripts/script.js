@@ -5,6 +5,7 @@ var word = "HACKER";
 
 var won = false;
 
+var playerId = "";
 const roomId = JSON.parse(document.getElementById('room-id').value);
 
 const roomSocket = new WebSocket(
@@ -44,7 +45,7 @@ function colourRow(response) {
 		switch(payload.values[i]) {
 			case 'CORRECT_PLACEMENT':
 				colourSquare(currentGridPosition[0] + i, 'green');
-				rightLetters += 1;
+				// rightLetters += 1;
 				break;
 			case 'CORRECT_LETTER':
 				colourSquare(currentGridPosition[0] + i, 'orange');
@@ -57,10 +58,10 @@ function colourRow(response) {
 		}
 	}
 
-	if (rightLetters == 6) {
-		won = true;
-		document.getElementById('win').innerHTML = "you won";
-	}
+	// if (rightLetters == 6) {
+	// 	won = true;
+	// 	document.getElementById('win').innerHTML = "you won";
+	// }
 }
 
 
@@ -174,7 +175,8 @@ roomSocket.onmessage = function(e) {
 		const data = JSON.parse(e.data);
 		switch (data.payload.type) {
 			case "CONNECTION_OPENED":
-				document.getElementById('player-id').value = data['id'];
+				document.getElementById('player-id').value = data.payload.id;
+				playerId = data.payload.id;
 				break;
 			case "SUBMIT_WORD":
 				colourRow(JSON.parse(e.data));
@@ -183,6 +185,12 @@ roomSocket.onmessage = function(e) {
 				items[1] = 0;
 				currentGridPosition = items.join().replace(',', '');
 				break;
+			case "PLAYER_WIN":
+				if (playerId == data.payload.player) {
+					alert("You won!");
+				} else {
+					alert("The opposing player won!");
+				}
 		}
 		//document.querySelector('#chat-log').value += (data.message + '\n');
 };

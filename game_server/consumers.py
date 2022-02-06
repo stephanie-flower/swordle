@@ -103,39 +103,52 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
 
         row = int(payload['row'])
         word = payload['word'].upper()
-        target_word = "HACKER"
+        target_word = "HACKER" # TODO: add a bank of words
 
         # Change the correct board to have the charStates and update
         room = self.room_boards[self.room_id]
         changedBoard = room[self.channel_name]
 
-        charStates = []
-        for i in range(0, 6):
-            if (word[i] == target_word[i]):
-                charStates.append(CharState.CORRECT_PLACEMENT)
-            elif (target_word[i].__contains__(word[i])):
-                charStates.append(CharState.CORRECT_LETTER)
-            else:
-                charStates.append(CharState.INCORRECT)
-            changedBoard.board[Coordinate(row, i)] = word[i]
-
-        room[self.channel_name] = changedBoard
-
-        print(charStates)
-
-        # Send message to session group
-        await self.channel_layer.group_send(
-            self.room_id,
-            {
-                'type': "send_to_room",
-                'payload': {
-                    'type': MessageType.SUBMIT_WORD,
-                    'player': self.channel_name,
-                    'row': row,
-                    'values': charStates
+        if word == target_word:
+            # Send message to session group
+            await self.channel_layer.group_send(
+                self.room_id,
+                {
+                    'type': "send_to_room",
+                    'payload': {
+                        'type': MessageType.PLAYER_WIN,
+                        'player': self.channel_name
+                    }
                 }
-            }
-        )
+            )
+        else:
+            charStates = []
+            for i in range(0, 6):
+                if (word[i] == target_word[i]):
+                    charStates.append(CharState.CORRECT_PLACEMENT)
+                elif (target_word[i].__contains__(word[i])):
+                    charStates.append(CharState.CORRECT_LETTER)
+                else:
+                    charStates.append(CharState.INCORRECT)
+                changedBoard.board[Coordinate(row, i)] = word[i]
+
+            room[self.channel_name] = changedBoard
+
+            print(charStates)
+
+            # Send message to session group
+            await self.channel_layer.group_send(
+                self.room_id,
+                {
+                    'type': "send_to_room",
+                    'payload': {
+                        'type': MessageType.SUBMIT_WORD,
+                        'player': self.channel_name,
+                        'row': row,
+                        'values': charStates
+                    }
+                }
+            )
 
     # Receive message from room group
     async def send_to_room(self, event):
