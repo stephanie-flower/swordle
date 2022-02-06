@@ -7,13 +7,23 @@ from django.core.cache import cache
 from game_model.dto.game_state import Coordinate
 from game_model.dto.game_state import GameBoard
 from game_model.json_interfaces.view_state import CharState
+import pandas as pd
 
 from .message_type import MessageType
 
 class GameSessionConsumer(AsyncWebsocketConsumer):
     # room_id -> dict of room to (dict of GameBoard to player)
     room_boards = {}
+    # room_id -> dict of room to their target
+    room_target = {}
     message_handlers = {}
+
+    # Pandas-retrieved list of words
+    data_path = "game_server/static/words.txt"
+    words_list = pd.read_csv(data_path, names=["word"])
+
+    def get_random_word(self):
+        return self.words_list.sample(1).iloc[0].word
 
     def __init__(self, *args, **kwargs):
         super().__init__(self, *args, **kwargs)
@@ -43,6 +53,7 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
         else:
             current_rooms[self.room_id] = [self.channel_name]
             self.room_boards[self.room_id] = {self.channel_name: gBoard}
+            self.room_target[self.room_id] = self.get_random_word()
 
         # Join session group with, giving the room_id and unique channel_name
         await self.channel_layer.group_add(
@@ -108,13 +119,11 @@ class GameSessionConsumer(AsyncWebsocketConsumer):
         row = int(payload['row'])
         word = payload['word'].upper()
 
-        target_word = "HACKER" # TODO: add a bank of words
-
         # Change the correct board to have the charStates and update
         room = self.room_boards[room_id]
         changedBoard = room[player_id]
 
-        if word == target_word:
+        if word == room_target[room_id]:
             # Send message to session group
             await self.channel_layer.group_send(
                 room_id,
