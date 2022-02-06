@@ -38,7 +38,16 @@ function colourKey(key, colour) {
 	document.getElementById(key).style.backgroundColor = colour;
 }
 
-function checkWord() {
+function colourRow(response) {
+	const payload = data.payload.payload;
+
+	for (var i = 0; i < payload.values.length; i++) {
+		
+	}
+}
+
+
+function _colourRow(response) {
 	var rightLetters = 0;
 	wordArray = word.split("");
 	guess = lettersArray[parseInt(currentGridPosition[0])];
@@ -144,12 +153,13 @@ function selectLetter(letter) {
 // SOCKET STUFF
 
 roomSocket.onmessage = function(e) {
-		const data = JSON.parse(e.data);
 		// Display the state of the row
 
 		items[0] += 1;
 		items[1] = 0;
 		currentGridPosition = items.join().replace(',', '')
+
+		colourRow(JSON.parse(e.data))
 		//document.querySelector('#chat-log').value += (data.message + '\n');
 };
 
