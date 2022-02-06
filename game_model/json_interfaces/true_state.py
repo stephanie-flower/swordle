@@ -1,6 +1,7 @@
 import dataclasses
 import json
 
+from game_model.custom_types import Char
 from game_model.custom_types import JsonStr
 
 
@@ -10,16 +11,14 @@ class UpdateTrueStateDTO:
 
     player_no: int
     row: int
-    col: int
-    value: str
+    value: list[Char]
 
 
 def _as_update_true_state_dto(dct: dict) -> UpdateTrueStateDTO:
     player_no = dct["player_no"]
     row = dct["row"]
-    col = dct["col"]
     value = dct["value"]
-    return UpdateTrueStateDTO(player_no, row, col, value)
+    return UpdateTrueStateDTO(player_no, row, value)
 
 
 def parse_update_request(json_str: JsonStr) -> UpdateTrueStateDTO:
