@@ -5,6 +5,16 @@ var word = "HACKER";
 
 var won = false;
 
+const roomId = JSON.parse(document.getElementById('room-id').value);
+
+const roomSocket = new WebSocket(
+		'ws://'
+		+ window.location.host
+		+ '/ws/session/'
+		+ roomId
+		+ '/'
+);
+
 //var sendGameData = {
 //	'guess' = "",
 //	'roomCode' = 0000
@@ -25,7 +35,36 @@ function colourKey(key, colour) {
 	document.getElementById(key).style.backgroundColor = colour;
 }
 
-function checkWord() {
+function colourRow(response) {
+	var rightLetters = 0;
+	var guess = lettersArray[parseInt(currentGridPosition[0])];
+	const payload = response.payload;
+
+	for (var i = 0; i < payload.values.length; i++) {
+		switch(payload.values[i]) {
+			case 'CORRECT_PLACEMENT':
+				colourSquare(currentGridPosition[0] + i, 'green');
+				rightLetters += 1;
+				break;
+			case 'CORRECT_LETTER':
+				colourSquare(currentGridPosition[0] + i, 'orange');
+				colourKey(guess[i],'orange');
+				break;
+			case 'INCORRECT':
+				colourSquare(currentGridPosition[0] + i, '#363636');
+				colourKey(guess[i],'#363636');
+				break;
+		}
+	}
+
+	if (rightLetters == 6) {
+		won = true;
+		document.getElementById('win').innerHTML = "you won";
+	}
+}
+
+
+function _colourRow(response) {
 	var rightLetters = 0;
 	wordArray = word.split("");
 	guess = lettersArray[parseInt(currentGridPosition[0])];
@@ -58,7 +97,18 @@ function back() {
 	for (i=0; i<items.length; i++){
 		items[i] = parseInt(items[i]); //['0','1'] -> [0,1]
 	}
-	if (items[1] != 0) {
+
+	if (items[1] == 6) {
+		var tempGridPosition = currentGridPosition.split("");
+		tempGridPosition[1] = parseInt(tempGridPosition[1]) - 1;
+		tempGridPosition = tempGridPosition.join().replace(',','');
+		
+		lettersArray[items[0]].pop();
+		document.getElementById(tempGridPosition).innerHTML = '';
+		items[1] = items[1] - 1;
+		currentGridPosition = items.join().replace(',','');
+	}
+	else if (items[1] != 0) {
 		lettersArray[items[0]].pop();
 		document.getElementById(currentGridPosition).innerHTML = '';
 		items[1] = items[1] - 1;
@@ -77,27 +127,19 @@ function activeRow(current) {
 }
 
 function enter() {
-
-
-	/*const messageInputDom = document.querySelector('#chat-input');
-	const message = messageInputDom.value;
-	roomSocket.send(JSON.stringify({
-			'message': message
-	}));
-	messageInputDom.value = '';*/
-
-
 	items = currentGridPosition.split(""); //'01' -> ['0','1']
 	for (i=0; i<items.length; i++){
 		items[i] = parseInt(items[i]); //['0','1'] -> [0,1]
 	}
-	if (items[1] == 7) {
-		alert('e');
+	if (items[1] == 6) {
 		// Send a request to the server with this data
 		let currentRow = currentGridPosition[0];
 		roomSocket.send(JSON.stringify({
 				'type': "SUBMIT_WORD",
-				'payload': lettersArray[currentRow].join("")
+				'payload': {
+					'word': lettersArray[currentRow].join(""),
+					'row': currentRow
+				}
 		}));
 		console.log(currentGridPosition);
 		activeRow(items[0] + 1);
@@ -119,7 +161,7 @@ function selectLetter(letter) {
 	for (i=0; i<items.length; i++){
 		items[i] = parseInt(items[i]); //['0','1'] -> [0,1]
 	}
-	if (items[1] != 5){
+	if (items[1] != 6){
 		items[1] += 1;
 		currentGridPosition = items.join().replace(',','');
 	}
@@ -127,23 +169,21 @@ function selectLetter(letter) {
 
 // SOCKET STUFF
 
-const roomId = JSON.parse(document.getElementById('room-id').textContent);
-
-const roomSocket = new WebSocket(
-		'ws://'
-		+ window.location.host
-		+ '/ws/session/'
-		+ roomId
-		+ '/'
-);
-
 roomSocket.onmessage = function(e) {
-		const data = JSON.parse(e.data);
 		// Display the state of the row
+		const data = JSON.parse(e.data);
+		switch (data.payload.type) {
+			case "CONNECTION_OPENED":
+				document.getElementById('player-id').value = data['id'];
+				break;
+			case "SUBMIT_WORD":
+				colourRow(JSON.parse(e.data));
 
-		items[0] += 1;
-		items[1] = 0;
-		currentGridPosition = items.join().replace(',', '')
+				items[0] += 1;
+				items[1] = 0;
+				currentGridPosition = items.join().replace(',', '');
+				break;
+		}
 		//document.querySelector('#chat-log').value += (data.message + '\n');
 };
 
@@ -155,15 +195,5 @@ roomSocket.onclose = function(e) {
 
 roomSocket.onopen = function(e) {
 		//document.querySelector('#chat-log').value += "*** Connected to Room " + roomId + " ***";
-
 		//console.error('Game socket closed unexpectedly');
-};
-
-document.querySelector('#chat-submit').onclick = function(e) {
-		const messageInputDom = document.querySelector('#chat-input');
-		const message = messageInputDom.value;
-		roomSocket.send(JSON.stringify({
-				'message': message
-		}));
-		messageInputDom.value = '';
 };

@@ -7,9 +7,9 @@
 </head>
 <body onload="document.querySelector('#chat-log').value = '';">
     <textarea id="chat-log" cols="100" rows="20"></textarea><br>
-    <input id="chat-input" type="text" size="100"><br>
+    <input id="chat-input" type="text" size="100">
     <input id="chat-submit" type="button" value="Send">
-    {{ room_id|json_script:"room-id" }}
+    <input id="room-id" type="hidden" value={{ room_id }}>
     <script type="text/javascript">
         const roomId = JSON.parse(document.getElementById('room-id').textContent);
 
@@ -27,14 +27,14 @@
         };
 
         roomSocket.onclose = function(e) {
-            document.querySelector('#chat-log').value += "*** CONNECTION CLOSED ***";
-        
+            document.querySelector('#chat-log').value += "*** CONNECTION CLOSED ***\n";
+
             console.error('Game socket closed unexpectedly');
         };
 
         roomSocket.onopen = function(e) {
-            document.querySelector('#chat-log').value += "*** Connected to Room " + roomId + " ***";
-        
+            document.querySelector('#chat-log').value += "*** Connected to Room " + roomId + " ***\n";
+
             console.error('Game socket closed unexpectedly');
         };
 
